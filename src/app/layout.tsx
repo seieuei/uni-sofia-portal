@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import { Source_Sans_3, Literata } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
@@ -28,10 +27,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="bg" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className={`${sans.variable} ${display.variable} font-sans antialiased`}>
-        <Script id="theme-init" strategy="beforeInteractive">
-          {THEME_INIT_SCRIPT}
-        </Script>
         <Providers>
           <div className="flex min-h-screen flex-col">
             <Header />
