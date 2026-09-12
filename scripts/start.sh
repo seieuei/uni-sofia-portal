@@ -9,7 +9,7 @@ export PORT="${PORT:-3000}"
 echo "→ prisma migrate deploy (DATABASE_URL=${DATABASE_URL})"
 npx prisma migrate deploy
 
-echo "→ seed if empty"
+echo "→ seed if empty + sync process catalog"
 npx tsx scripts/seed-if-empty.ts
 
 echo "→ next start -H 0.0.0.0 -p ${PORT}"

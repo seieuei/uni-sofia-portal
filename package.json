@@ -15,7 +15,7 @@
     "start:prod": "bash scripts/start.sh",
     "template:5.2": "tsx scripts/build-5-2-template.ts",
     "template:catalog": "python3 scripts/build-official-templates.py",
-    "prebuild": "tsx scripts/build-5-2-template.ts && python3 scripts/build-official-templates.py && prisma generate"
+    "prebuild": "tsx scripts/build-5-2-template.ts && prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

@@ -20,8 +20,14 @@ async function ensureTemplate() {
     });
     if (r.status !== 0) throw new Error("Failed to build 5.2 template");
   }
+  const officialDir = path.join(process.cwd(), "templates", "official");
+  const existingOfficial = fs.existsSync(officialDir)
+    ? fs.readdirSync(officialDir).filter((f) => f.endsWith(".docx")).length
+    : 0;
   const catalogPy = path.join(process.cwd(), "scripts", "build-official-templates.py");
-  if (fs.existsSync(catalogPy)) {
+  if (existingOfficial > 0) {
+    console.log(`Official catalog templates already present (${existingOfficial} docx) — skipping python regenerate.`);
+  } else if (fs.existsSync(catalogPy)) {
     console.log("Building structural official catalog templates…");
     const r2 = spawnSync("python3", [catalogPy], { stdio: "inherit", env: process.env });
     if (r2.status !== 0) console.warn("Official catalog templates: non-zero exit (continuing)");

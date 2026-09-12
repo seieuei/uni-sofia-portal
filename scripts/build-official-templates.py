@@ -10,7 +10,7 @@ import json, os, re, zipfile
 from io import BytesIO
 from pathlib import Path
 
-ROOT = Path("/workspace/uni-sofia-portal")
+ROOT = Path(__file__).resolve().parent.parent
 CATALOG_TS = ROOT / "src/lib/catalog.ts"
 
 CONTENT_TYPES = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
