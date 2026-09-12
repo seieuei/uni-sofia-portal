@@ -106,6 +106,26 @@ API: `/api/faculties`, `/api/forms`, `/api/forms/[slug]`, `/api/submissions`
 
 ---
 
+## Deploy on Railway (SQLite + volume)
+
+1. Create a Railway project from this repo (Nixpacks build is fine).
+2. Add a **volume** mounted at `/data` so the SQLite file survives restarts.
+3. Set environment variable:
+   - `DATABASE_URL`=`file:/data/dev.db`
+4. Railway will run `npm run build`, then `npm run start`, which:
+   - runs `prisma migrate deploy`
+   - seeds **only if** there are no forms yet
+   - starts Next.js on `0.0.0.0:${PORT}`
+
+Local production-style check (uses `file:./dev.db` from `.env`):
+
+```bash
+npm run build
+npm run start
+```
+
+---
+
 ## Лиценз / тон
 
 Демо проект с афектен roast. Ако си от СУ и се усмихнеш — мисията е изпълнена.
