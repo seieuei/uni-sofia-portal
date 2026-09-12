@@ -74,7 +74,7 @@ export function recipientLabel(name: string, lang: "bg" | "en"): string {
 }
 
 function uniq(items: string[]): string[] {
-  return [...new Set(items.filter(Boolean))];
+  return Array.from(new Set(items.filter(Boolean)));
 }
 
 function domainOffice(p: RouteableProcess): string {
@@ -176,7 +176,7 @@ export function copyPackFor(p: RouteableProcess): string[] {
   }
 
   if (p.family === "declaration") {
-    const pack = [R.initiator, domainOffice(p)];
+    const pack: string[] = [R.initiator, domainOffice(p)];
     if (p.hasPayment) pack.push(R.finance, R.cashier);
     return uniq(pack);
   }
@@ -190,19 +190,19 @@ export function copyPackFor(p: RouteableProcess): string[] {
   }
 
   if (p.family === "phd") {
-    const pack = [R.faculty, R.phdOffice];
+    const pack: string[] = [R.faculty, R.phdOffice];
     if (p.hasPayment) pack.push(R.finance, R.cashier);
     return uniq(pack);
   }
 
   if (p.family === "petition") {
-    const pack = [R.od, R.facultyStudents];
+    const pack: string[] = [R.od, R.facultyStudents];
     if (p.hasPayment) pack.push(R.finance, R.cashier);
     return uniq(pack);
   }
 
   // Default for other money / legal acts: initiator · domain · finance · каса as appropriate.
-  const pack = [R.initiator, domainOffice(p)];
+  const pack: string[] = [R.initiator, domainOffice(p)];
   if (p.hasPayment || p.family === "pay" || p.family === "contract" || p.family === "load") {
     pack.push(R.finance);
     if (p.hasPayment || p.family === "pay" || p.family === "load") pack.push(R.cashier);
