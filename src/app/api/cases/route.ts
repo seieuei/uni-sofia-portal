@@ -4,6 +4,8 @@ import { canStartProcess, getCurrentUser } from "@/lib/auth";
 import { addCaseEvent, makeCaseNumber } from "@/lib/cases";
 import { LOAD_ACTIVITY_RATES } from "@/lib/rates";
 import { generateCaseDocument, writeGenerated } from "@/lib/portalDocx";
+import { catalogBySlug } from "@/lib/catalog";
+import { parseRouteJson, routeFor, routeStepPayload, type RouteStepDef } from "@/lib/processRoute";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +38,7 @@ type LineInput = {
   rateEur?: number;
 };
 
-type RouteStep = { key: string; titleBg: string; titleEn: string };
+type RouteStep = RouteStepDef;
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
@@ -93,17 +95,21 @@ async function createGenericCase(
     }
   }
 
-  let route: RouteStep[] = [];
-  try {
-    route = JSON.parse(process.routeJson || "[]");
-  } catch {
-    route = [];
-  }
+  const cat = catalogBySlug(process.slug);
+  let route: RouteStep[] = parseRouteJson(process.routeJson);
+  if (route.length === 0 && cat) route = routeFor(cat);
   if (route.length === 0) {
     route = [
-      { key: "initiator", titleBg: "Инициатор", titleEn: "Initiator" },
-      { key: "rector", titleBg: "Ректор", titleEn: "Rector" },
-      { key: "archive", titleBg: "Архив", titleEn: "Archive" },
+      { key: "initiator", titleBg: "Инициатор", titleEn: "Initiator", phase: "approve" },
+      { key: "rector", titleBg: "Ректор", titleEn: "Rector", phase: "approve" },
+      { key: "archive", titleBg: "Архив", titleEn: "Archive", phase: "register" },
+      {
+        key: "copies",
+        titleBg: "Копия след извеждане",
+        titleEn: "Copies after outgoing register",
+        phase: "copies",
+        recipients: ["Инициатор"],
+      },
     ];
   }
 
@@ -154,6 +160,7 @@ async function createGenericCase(
           status: i === 0 ? "done" : i === 1 && !draft ? "waiting" : "pending",
           assigneeId: i === 0 ? user.id : null,
           sortOrder: i + 1,
+          payloadJson: routeStepPayload(s),
         })),
       },
     },
@@ -179,7 +186,7 @@ async function createGenericCase(
 
 async function createLoadCase(
   user: { id: string; name: string; facultyId: string | null },
-  process: { id: string; titleBg: string },
+  process: { id: string; slug: string; titleBg: string; routeJson: string },
   body: Record<string, unknown>
 ) {
   const period = String(body.period || "").trim();
@@ -231,6 +238,10 @@ async function createLoadCase(
 
   const status = sendToLecturers ? "awaiting_lecturer" : "draft";
   const number = makeCaseNumber();
+  const cat = catalogBySlug(process.slug);
+  const officialRoute = (cat ? routeFor(cat) : parseRouteJson(process.routeJson)).filter(
+    (s) => s.key !== "initiator"
+  );
 
   const created = await prisma.case.create({
     data: {
@@ -272,28 +283,16 @@ async function createLoadCase(
             status: "pending",
             assigneeId: user.id,
             sortOrder: 50,
+            payloadJson: JSON.stringify({ phase: "approve" }),
           },
-          {
-            key: "legal",
-            titleBg: "Правен отдел (stub)",
-            titleEn: "Legal (stub)",
-            status: "pending",
-            sortOrder: 60,
-          },
-          {
-            key: "pfc",
-            titleBg: "ПФЦ / финанси (stub)",
-            titleEn: "PFC / finance (stub)",
-            status: "pending",
-            sortOrder: 70,
-          },
-          {
-            key: "rector",
-            titleBg: "Готово за ректор",
-            titleEn: "Ready for rector",
-            status: "pending",
-            sortOrder: 80,
-          },
+          ...officialRoute.map((s, i) => ({
+            key: s.key,
+            titleBg: s.titleBg,
+            titleEn: s.titleEn,
+            status: "pending" as const,
+            sortOrder: 60 + i,
+            payloadJson: routeStepPayload(s),
+          })),
         ],
       },
     },

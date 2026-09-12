@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useApp } from "@/components/Providers";
 import { DynamicForm } from "@/components/DynamicForm";
+import { RouteTimeline } from "@/components/RouteTimeline";
 import type { CatalogField, RouteStepDef } from "@/lib/catalog";
 import { ACTIVITY_KEYS, LOAD_ACTIVITY_RATES } from "@/lib/rates";
 
@@ -187,13 +188,19 @@ export default function NewProcessPage() {
       <p className="mt-2 text-sm text-ink/60">{lang === "bg" ? process.descriptionBg : process.descriptionEn}</p>
 
       {process.route.length > 0 && (
-        <ol className="mt-4 flex flex-wrap gap-2 text-xs text-ink/55">
-          {process.route.map((s, i) => (
-            <li key={s.key} className="rounded-full bg-cream px-2 py-1">
-              {i + 1}. {lang === "bg" ? s.titleBg : s.titleEn}
-            </li>
-          ))}
-        </ol>
+        <section className="paper-card mt-6 p-5">
+          <h2 className="font-display text-base font-semibold">
+            {lang === "bg" ? "Официален маршрут" : "Official route"}
+          </h2>
+          <p className="mt-1 text-xs text-ink/50">
+            {lang === "bg"
+              ? "Ред на съгласуване по Приложение №1, след това извеждане и копия."
+              : "Approval order from Annex 1, then outgoing register and copies."}
+          </p>
+          <div className="mt-3">
+            <RouteTimeline steps={process.route} lang={lang} />
+          </div>
+        </section>
       )}
 
       {process.wizardKind === "load-5-2" ? (
