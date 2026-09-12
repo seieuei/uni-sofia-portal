@@ -61,7 +61,7 @@ export default function RegisterPage() {
   return (
     <div className="mx-auto max-w-lg px-4 py-16">
       <h1 className="font-display text-3xl font-bold">{t("registerTitle", lang)}</h1>
-      <p className="mt-2 rounded-lg border border-amber-700/20 bg-amber-50/80 px-3 py-2 text-sm text-ink/70">
+      <p className="callout mt-2 px-3 py-2 text-sm">
         {lang === "bg"
           ? "Отворена регистрация само за демо. Не създава истински университетски акаунт."
           : "Open registration for demo only. Does not create a real university account."}

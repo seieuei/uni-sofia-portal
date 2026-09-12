@@ -3,12 +3,29 @@
 @tailwind utilities;
 
 :root {
-  --cream: #f7f1e8;
-  --ink: #1c1410;
-  --burgundy: #7a1f2b;
-  --gold: #c4a35a;
-  --sage: #3d5a4c;
-  --paper: #fffdf8;
+  --cream: 247 241 232;
+  --ink: 28 20 16;
+  --burgundy: 122 31 43;
+  --gold: 196 163 90;
+  --sage: 61 90 76;
+  --paper: 255 253 248;
+  --surface: 255 255 255;
+  --ivory: 247 241 232;
+  --night: 20 15 13;
+  color-scheme: light;
+}
+
+.dark {
+  --cream: 17 14 12;
+  --ink: 244 236 227;
+  --burgundy: 196 86 98;
+  --gold: 212 184 112;
+  --sage: 132 176 152;
+  --paper: 30 24 21;
+  --surface: 42 35 30;
+  --ivory: 247 241 232;
+  --night: 10 8 7;
+  color-scheme: dark;
 }
 
 html {
@@ -16,12 +33,19 @@ html {
 }
 
 body {
-  color: var(--ink);
+  color: rgb(var(--ink));
   background:
     radial-gradient(1200px 600px at 10% -10%, rgba(122, 31, 43, 0.08), transparent 55%),
     radial-gradient(900px 500px at 100% 0%, rgba(196, 163, 90, 0.12), transparent 50%),
-    var(--cream);
+    rgb(var(--cream));
   min-height: 100vh;
+}
+
+.dark body {
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(196, 86, 98, 0.16), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, rgba(212, 184, 112, 0.08), transparent 50%),
+    rgb(var(--cream));
 }
 
 .font-display {
@@ -32,22 +56,32 @@ body {
   @apply rounded-2xl border border-ink/10 bg-paper shadow-[0_1px_0_rgba(28,20,16,0.04),0_12px_40px_-24px_rgba(28,20,16,0.35)];
 }
 
+.dark .paper-card {
+  box-shadow:
+    0 1px 0 rgba(255, 253, 248, 0.04),
+    0 16px 40px -20px rgba(0, 0, 0, 0.7);
+}
+
 .stamp {
   @apply inline-flex items-center gap-1 rounded-md border-2 border-burgundy/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-burgundy rotate-[-2deg];
 }
 
 .btn-primary {
-  @apply inline-flex items-center justify-center gap-2 rounded-xl bg-burgundy px-4 py-2.5 text-sm font-semibold text-cream shadow-sm transition hover:bg-burgundy/90 disabled:opacity-50;
+  @apply inline-flex items-center justify-center gap-2 rounded-xl bg-burgundy px-4 py-2.5 text-sm font-semibold text-ivory shadow-sm transition hover:bg-burgundy/90 disabled:opacity-50;
 }
 
 .btn-secondary {
-  @apply inline-flex items-center justify-center gap-2 rounded-xl border border-ink/15 bg-white px-4 py-2.5 text-sm font-medium text-ink transition hover:bg-ink/5;
+  @apply inline-flex items-center justify-center gap-2 rounded-xl border border-ink/15 bg-surface px-4 py-2.5 text-sm font-medium text-ink transition hover:bg-ink/5;
 }
 
 .field {
-  @apply w-full rounded-xl border border-ink/15 bg-white px-3 py-2.5 text-sm outline-none ring-burgundy/30 focus:ring-2;
+  @apply w-full rounded-xl border border-ink/15 bg-surface px-3 py-2.5 text-sm text-ink outline-none ring-burgundy/30 placeholder:text-ink/40 focus:ring-2;
 }
 
 .label {
   @apply mb-1.5 block text-sm font-medium text-ink/80;
+}
+
+.callout {
+  @apply rounded-xl border border-amber-800/20 bg-amber-50/80 text-ink/75 dark:border-amber-300/20 dark:bg-amber-950/35;
 }

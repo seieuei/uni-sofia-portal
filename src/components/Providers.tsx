@@ -5,10 +5,21 @@ import type { Lang, Persona, Role, SessionUser } from "@/lib/types";
 import { LANG_COOKIE } from "@/lib/types";
 import { clearPersona, readPersona, writePersona } from "@/lib/persona";
 import { pickLang } from "@/lib/i18n";
+import {
+  applyTheme,
+  persistTheme,
+  readResolvedTheme,
+  readSavedTheme,
+  systemTheme,
+  type ResolvedTheme,
+} from "@/lib/theme";
 
 type Ctx = {
   lang: Lang;
   setLang: (l: Lang) => void;
+  theme: ResolvedTheme;
+  setTheme: (t: ResolvedTheme) => void;
+  toggleTheme: () => void;
   user: SessionUser | null;
   persona: Persona | null;
   setPersona: (p: Persona) => void;
@@ -30,6 +41,7 @@ function readLang(): Lang {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Lang>("bg");
+  const [theme, setThemeState] = useState<ResolvedTheme>("light");
   const [user, setUser] = useState<SessionUser | null>(null);
   const [persona, setPersonaState] = useState<Persona | null>(null);
   const [ready, setReady] = useState(false);
@@ -57,16 +69,39 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setLangState(readLang());
+    setThemeState(readResolvedTheme());
     const legacy = readPersona();
     setPersonaState(legacy);
     refreshUser().finally(() => setReady(true));
   }, [refreshUser]);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = () => {
+      if (readSavedTheme()) return;
+      const next = systemTheme();
+      applyTheme(next);
+      setThemeState(next);
+    };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
     localStorage.setItem(LANG_COOKIE, l);
     document.cookie = `${LANG_COOKIE}=${l}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
   }, []);
+
+  const setTheme = useCallback((next: ResolvedTheme) => {
+    setThemeState(next);
+    applyTheme(next);
+    persistTheme(next);
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  }, [theme, setTheme]);
 
   const setPersona = useCallback((p: Persona) => {
     writePersona(p);
@@ -89,6 +124,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     () => ({
       lang,
       setLang,
+      theme,
+      setTheme,
+      toggleTheme,
       user,
       persona: user
         ? {
@@ -104,7 +142,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       logout,
       ready,
     }),
-    [lang, setLang, user, persona, setPersona, resetPersona, refreshUser, logout, ready]
+    [lang, setLang, theme, setTheme, toggleTheme, user, persona, setPersona, resetPersona, refreshUser, logout, ready]
   );
 
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>;

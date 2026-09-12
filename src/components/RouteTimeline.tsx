@@ -35,8 +35,8 @@ function phaseOf(s: TimelineStep): RoutePhase {
 }
 
 function statusTone(status?: string) {
-  if (status === "done") return "bg-sage text-cream";
-  if (status === "waiting") return "bg-burgundy text-cream";
+  if (status === "done") return "bg-sage text-ivory";
+  if (status === "waiting") return "bg-burgundy text-ivory";
   return "bg-ink/15 text-ink/70";
 }
 

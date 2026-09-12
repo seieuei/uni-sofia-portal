@@ -108,6 +108,7 @@ export function DynamicForm({
             <label key={f.name} className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
+                className="accent-burgundy"
                 checked={Boolean(val)}
                 onChange={(e) => onChange(f.name, e.target.checked)}
               />
