@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useApp } from "./Providers";
+import { ThemeToggle } from "./ThemeToggle";
 import { t } from "@/lib/i18n";
 import { ROLES } from "@/lib/types";
 
@@ -41,7 +42,7 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b border-ink/10 bg-cream/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
         <Link href={user ? "/week" : "/"} className="group flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-burgundy text-sm font-bold text-cream shadow-sm">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-burgundy text-sm font-bold text-ivory shadow-sm">
             СУ*
           </span>
           <div className="leading-tight">
@@ -71,7 +72,7 @@ export function Header() {
 
         <div className="flex items-center gap-2">
           {ready && roleLabel && (
-            <span className="hidden rounded-full border border-ink/10 bg-white px-2.5 py-1 text-xs text-ink/70 sm:inline">
+            <span className="hidden rounded-full border border-ink/10 bg-surface px-2.5 py-1 text-xs text-ink/70 sm:inline">
               {roleLabel}
               {user?.facultyCode ? ` · ${user.facultyCode}` : ""}
             </span>
@@ -85,18 +86,19 @@ export function Header() {
               {t("navLogin", lang)}
             </Link>
           ) : null}
-          <div className="flex overflow-hidden rounded-lg border border-ink/15 bg-white text-xs font-medium">
+          <ThemeToggle />
+          <div className="flex overflow-hidden rounded-lg border border-ink/15 bg-surface text-xs font-medium">
             <button
               type="button"
               onClick={() => setLang("bg")}
-              className={`px-2.5 py-1.5 ${lang === "bg" ? "bg-burgundy text-cream" : "text-ink/60 hover:bg-ink/5"}`}
+              className={`px-2.5 py-1.5 ${lang === "bg" ? "bg-burgundy text-ivory" : "text-ink/60 hover:bg-ink/5"}`}
             >
               БГ
             </button>
             <button
               type="button"
               onClick={() => setLang("en")}
-              className={`px-2.5 py-1.5 ${lang === "en" ? "bg-burgundy text-cream" : "text-ink/60 hover:bg-ink/5"}`}
+              className={`px-2.5 py-1.5 ${lang === "en" ? "bg-burgundy text-ivory" : "text-ink/60 hover:bg-ink/5"}`}
             >
               EN
             </button>

@@ -35,17 +35,17 @@ export default function LandingPage() {
               </Link>
             </div>
             <p className="mt-4 text-sm text-ink/50">{t("tagline", lang)}</p>
-            <div className="mt-6 rounded-xl border border-amber-700/20 bg-amber-50/80 px-4 py-3 text-sm text-ink/75">
+            <div className="callout mt-6 px-4 py-3 text-sm">
               {lang === "bg" ? (
                 <>
                   <strong>Дисклеймър:</strong> Не е официален сайт на СУ. Демо акаунти с парола{" "}
-                  <code className="rounded bg-white px-1">demo1234</code>. Допълва СУСИ / elearn /
+                  <code className="rounded bg-surface px-1">demo1234</code>. Допълва СУСИ / elearn /
                   Архимед — не ги замества.
                 </>
               ) : (
                 <>
                   <strong>Disclaimer:</strong> Not an official SU site. Demo accounts password{" "}
-                  <code className="rounded bg-white px-1">demo1234</code>. Complements SUSI / elearn /
+                  <code className="rounded bg-surface px-1">demo1234</code>. Complements SUSI / elearn /
                   Arhimed — does not replace them.
                 </>
               )}
@@ -106,7 +106,7 @@ export default function LandingPage() {
           <ol className="mt-8 grid gap-4 md:grid-cols-4">
             {(["how1", "how2", "how3", "how4"] as const).map((k, i) => (
               <li key={k} className="paper-card flex gap-3 p-5">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-burgundy text-sm font-bold text-cream">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-burgundy text-sm font-bold text-ivory">
                   {i + 1}
                 </span>
                 <span className="text-sm font-medium leading-snug">{t(k, lang)}</span>

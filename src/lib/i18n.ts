@@ -142,6 +142,8 @@ const dict = {
   loginTitle: { bg: "Вход", en: "Sign in" },
   registerTitle: { bg: "Регистрация (демо)", en: "Register (demo)" },
   demoCreds: { bg: "Демо акаунти", en: "Demo accounts" },
+  themeToDark: { bg: "Тъмна тема", en: "Dark theme" },
+  themeToLight: { bg: "Светла тема", en: "Light theme" },
   footerNote: {
     bg: "* Пилот · не е официален СУ · допълва СУСИ/elearn/Архимед · без истински SSO",
     en: "* Pilot · not official SU · complements SUSI/elearn/Arhimed · no real SSO",
