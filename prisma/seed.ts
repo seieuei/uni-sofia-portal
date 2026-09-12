@@ -3,6 +3,9 @@ import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
 import { spawnSync } from "child_process";
+import { seedProcesses } from "./seed-processes";
+import { generateCaseDocument, writeGenerated } from "../src/lib/portalDocx";
+import { catalogBySlug, fieldsFor } from "../src/lib/catalog";
 
 const prisma = new PrismaClient();
 
@@ -17,6 +20,12 @@ async function ensureTemplate() {
     });
     if (r.status !== 0) throw new Error("Failed to build 5.2 template");
   }
+  const catalogPy = path.join(process.cwd(), "scripts", "build-official-templates.py");
+  if (fs.existsSync(catalogPy)) {
+    console.log("Building structural official catalog templates…");
+    const r2 = spawnSync("python3", [catalogPy], { stdio: "inherit", env: process.env });
+    if (r2.status !== 0) console.warn("Official catalog templates: non-zero exit (continuing)");
+  }
 }
 
 async function main() {
@@ -30,6 +39,7 @@ async function main() {
   await prisma.case.deleteMany();
   await prisma.processDefinition.deleteMany();
   await prisma.templateAsset.deleteMany();
+  await prisma.handbookEntry.deleteMany();
   await prisma.profile.deleteMany();
   await prisma.user.deleteMany();
   await prisma.submission.deleteMany();
@@ -501,20 +511,43 @@ async function main() {
     users[u.role] = { id: created.id, email: created.email, name: created.name, role: u.role };
   }
 
-  const process = await prisma.processDefinition.create({
-    data: {
-      slug: "load-pay-5-2",
-      titleBg: "Натовареност / хонорари (образец 5.2)",
-      titleEn: "Load / honorary pay (form 5.2)",
-      descriptionBg:
-        "Събиране на часове за хонорувани преподаватели, потвърждение и генериране на официален DOCX.",
-      descriptionEn:
-        "Collect honorary lecturer hours, confirm, and generate an official-looking DOCX.",
-      rolesAllowed: "program_admin,faculty_admin",
-      templatePath: "templates/official/5.2-honorary.docx",
-      active: true,
-    },
-  });
+  await seedProcesses(prisma);
+
+  function attachGeneratedDoc(
+    c: { id: string; number: string },
+    proc: { slug: string; titleBg: string; catalogCode: string | null; templatePath: string | null },
+    fields: Record<string, unknown>,
+    preparedBy: string
+  ) {
+    const cat = catalogBySlug(proc.slug);
+    const schema = cat ? fieldsFor(cat) : [];
+    const fieldRows = schema.map((f) => ({
+      name: f.name,
+      label: f.labelBg,
+      value: f.name === "loadLines" ? JSON.stringify(fields.loadLines ?? []) : String(fields[f.name] ?? ""),
+    }));
+    const gen = generateCaseDocument({
+      process: {
+        slug: proc.slug,
+        titleBg: proc.titleBg,
+        catalogCode: proc.catalogCode,
+        templatePath: proc.templatePath,
+      },
+      caseNumber: c.number,
+      preparedBy,
+      faculty: String(fields.faculty || ""),
+      fields: fieldRows,
+      fieldMap: fields,
+    });
+    const written = writeGenerated(gen.filename, gen.buffer);
+    return prisma.case.update({ where: { id: c.id }, data: { docPath: written.rel } });
+  }
+
+
+  const process = await prisma.processDefinition.findUniqueOrThrow({ where: { slug: "load-pay-5-2" } });
+  const leaveProc = await prisma.processDefinition.findUnique({ where: { slug: "p-2-9" } });
+  const interruptProc = await prisma.processDefinition.findUnique({ where: { slug: "p-3-5" } });
+  const memoProc = await prisma.processDefinition.findUnique({ where: { slug: "p-9-4" } });
 
   await prisma.templateAsset.create({
     data: {
@@ -657,8 +690,134 @@ async function main() {
     ],
   });
 
+  if (leaveProc) {
+    const leaveCase = await prisma.case.create({
+      data: {
+        number: "ПР-2609-10002",
+        title: "Отпуск — д-р Иван Хонораров — 2026",
+        status: "awaiting_approvals",
+        processId: leaveProc.id,
+        ownerId: users.lecturer.id,
+        facultyId: fcml.id,
+        metaJson: JSON.stringify({
+          fields: {
+            fullName: users.lecturer.name,
+            faculty: "ФКНФ",
+            department: "Африканистика",
+            leaveType: "paid",
+            dateFrom: "2026-10-01",
+            dateTo: "2026-10-14",
+            grounds: "Платен годишен отпуск (демо).",
+          },
+        }),
+        steps: {
+          create: [
+            { key: "initiator", titleBg: "Инициатор", titleEn: "Initiator", status: "done", sortOrder: 1, assigneeId: users.lecturer.id },
+            { key: "domain", titleBg: "ЛСТО / Човешки ресурси", titleEn: "HR / LSTO", status: "waiting", sortOrder: 2 },
+            { key: "rector", titleBg: "Ректор", titleEn: "Rector", status: "pending", sortOrder: 3 },
+            { key: "archive", titleBg: "Архив", titleEn: "Archive", status: "pending", sortOrder: 4 },
+          ],
+        },
+      },
+    });
+    await prisma.caseEvent.create({
+      data: {
+        caseId: leaveCase.id,
+        actorId: users.lecturer.id,
+        type: "created",
+        messageBg: "Демо преписка за отпуск.",
+        messageEn: "Demo leave case.",
+      },
+    });
+    await attachGeneratedDoc(leaveCase, leaveProc, JSON.parse(leaveCase.metaJson).fields, users.lecturer.name);
+  }
+
+  if (interruptProc) {
+    const stCase = await prisma.case.create({
+      data: {
+        number: "ПР-2609-10003",
+        title: "Прекъсване — Мария Студентова — 2025/26",
+        status: "awaiting_approvals",
+        processId: interruptProc.id,
+        ownerId: users.student.id,
+        facultyId: fcml.id,
+        metaJson: JSON.stringify({
+          fields: {
+            fullName: users.student.name,
+            faculty: "ФКНФ",
+            department: "Африканистика",
+            studentId: "20203-306",
+            year: "3",
+            specialty: "Африканистика",
+            pudGround: "illness",
+            grounds: "Демо заявление по чл. 165 ПУД.",
+          },
+        }),
+        steps: {
+          create: [
+            { key: "initiator", titleBg: "Инициатор", titleEn: "Initiator", status: "done", sortOrder: 1, assigneeId: users.student.id },
+            { key: "domain", titleBg: "Инспектор Студенти", titleEn: "Student inspector", status: "waiting", sortOrder: 2 },
+            { key: "dean", titleBg: "Декан — мнение", titleEn: "Dean opinion", status: "pending", sortOrder: 3, assigneeId: users.faculty_admin.id },
+            { key: "rector", titleBg: "Ректор", titleEn: "Rector", status: "pending", sortOrder: 4 },
+          ],
+        },
+      },
+    });
+    await prisma.caseEvent.create({
+      data: {
+        caseId: stCase.id,
+        actorId: users.student.id,
+        type: "created",
+        messageBg: "Демо студентско заявление 3.5.",
+        messageEn: "Demo student petition 3.5.",
+      },
+    });
+    await attachGeneratedDoc(stCase, interruptProc, JSON.parse(stCase.metaJson).fields, users.student.name);
+  }
+
+  if (memoProc) {
+    const memo = await prisma.case.create({
+      data: {
+        number: "ПР-2609-10004",
+        title: "Докладна — Африканистика — демо",
+        status: "draft",
+        processId: memoProc.id,
+        ownerId: users.faculty_admin.id,
+        facultyId: fcml.id,
+        metaJson: JSON.stringify({
+          fields: {
+            fullName: users.faculty_admin.name,
+            faculty: "ФКНФ",
+            department: "ФКНФ деканат",
+            addressee: "Ректора на СУ",
+            subject: "Демо докладна записка",
+            body: "Моля да се запознаете с приложеното (демо).",
+          },
+        }),
+        steps: {
+          create: [
+            { key: "initiator", titleBg: "Инициатор", titleEn: "Initiator", status: "done", sortOrder: 1, assigneeId: users.faculty_admin.id },
+            { key: "registry", titleBg: "Деловодство", titleEn: "Registry", status: "pending", sortOrder: 2 },
+            { key: "archive", titleBg: "Архив", titleEn: "Archive", status: "pending", sortOrder: 3 },
+          ],
+        },
+      },
+    });
+    await prisma.caseEvent.create({
+      data: {
+        caseId: memo.id,
+        actorId: users.faculty_admin.id,
+        type: "created",
+        messageBg: "Демо докладна 9.4.",
+        messageEn: "Demo memo 9.4.",
+      },
+    });
+    await attachGeneratedDoc(memo, memoProc, JSON.parse(memo.metaJson).fields, users.faculty_admin.name);
+  }
+
+  const procCount = await prisma.processDefinition.count();
   console.log(
-    `Seeded ${faculties.length} faculties, ${offices.length} offices, ${forms.length} forms, ${Object.keys(users).length} users, process ${process.slug}, sample case ${sampleCase.number}.`
+    `Seeded ${faculties.length} faculties, ${offices.length} offices, ${forms.length} forms, ${Object.keys(users).length} users, ${procCount} processes, sample cases ПР-2609-10001..10004.`
   );
   console.log("Demo password for all users: demo1234");
 }

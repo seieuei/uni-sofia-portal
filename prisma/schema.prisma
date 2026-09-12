@@ -122,6 +122,15 @@ model ProcessDefinition {
   // comma-separated roles that may start this process (default deny)
   rolesAllowed  String
   templatePath  String?
+  catalogCode   String?
+  hub           String   @default("other")
+  family        String?
+  wizardKind    String   @default("dynamic")
+  fieldsJson    String   @default("[]")
+  routeJson     String   @default("[]")
+  driveFileId   String?
+  sourceFolder  String?
+  nomenclatura  String?
   active        Boolean  @default(true)
   cases         Case[]
   createdAt     DateTime @default(now())
@@ -140,6 +149,7 @@ model Case {
   faculty     Faculty?          @relation(fields: [facultyId], references: [id])
   metaJson    String            @default("{}")
   arhimedNo   String?
+  docPath     String?
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   steps       CaseStep[]
@@ -215,5 +225,19 @@ model TemplateAsset {
   path        String
   driveFileId String?
   notes       String?
+  createdAt   DateTime @default(now())
+}
+
+model HandbookEntry {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  titleBg     String
+  titleEn     String
+  summaryBg   String
+  summaryEn   String
+  kind        String
+  driveFileId String?
+  path        String?
+  sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
 }

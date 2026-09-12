@@ -1,10 +1,11 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useApp } from "@/components/Providers";
 import { t } from "@/lib/i18n";
-import { ACTIVITY_KEYS, LOAD_ACTIVITY_RATES } from "@/lib/rates";
+import { HUBS, type HubId } from "@/lib/catalog";
 
 type Process = {
   id: string;
@@ -13,35 +14,18 @@ type Process = {
   titleEn: string;
   descriptionBg: string;
   descriptionEn: string;
+  catalogCode: string | null;
+  hub: HubId | string;
+  wizardKind: string;
+  nomenclatura: string | null;
 };
 
-type Line = {
-  lecturerName: string;
-  lecturerEmail: string;
-  activity: string;
-  hours: string;
-  rateEur: string;
-};
-
-const emptyLine = (): Line => ({
-  lecturerName: "д-р Иван Хонораров",
-  lecturerEmail: "lecturer@demo.uni-sofia.local",
-  activity: "lectures",
-  hours: "30",
-  rateEur: String(LOAD_ACTIVITY_RATES.lectures.rateEur),
-});
-
-export default function NewCasePage() {
+export default function NewCaseCatalogPage() {
   const { lang, user, ready } = useApp();
   const router = useRouter();
   const [processes, setProcesses] = useState<Process[]>([]);
-  const [processSlug, setProcessSlug] = useState("load-pay-5-2");
-  const [period, setPeriod] = useState("Зимен семестър 2025/26");
-  const [program, setProgram] = useState("Африканистика");
-  const [funding, setFunding] = useState("Факултетен бюджет / хонорари");
-  const [lines, setLines] = useState<Line[]>([emptyLine()]);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [q, setQ] = useState("");
+  const [hub, setHub] = useState<string>("all");
 
   useEffect(() => {
     if (!ready) return;
@@ -51,211 +35,103 @@ export default function NewCasePage() {
     }
     fetch("/api/processes")
       .then((r) => r.json())
-      .then((d) => {
-        const list = d.processes || [];
-        setProcesses(list);
-        if (list[0]) setProcessSlug(list[0].slug);
-      });
+      .then((d) => setProcesses(d.processes || []));
   }, [ready, user, router]);
 
-  function updateLine(i: number, patch: Partial<Line>) {
-    setLines((prev) => {
-      const next = [...prev];
-      const merged = { ...next[i], ...patch };
-      if (patch.activity && !patch.rateEur) {
-        merged.rateEur = String(LOAD_ACTIVITY_RATES[patch.activity]?.rateEur ?? merged.rateEur);
-      }
-      next[i] = merged;
-      return next;
+  const filtered = useMemo(() => {
+    const query = q.trim().toLowerCase();
+    return processes.filter((p) => {
+      if (hub !== "all" && p.hub !== hub) return false;
+      if (!query) return true;
+      const hay = `${p.catalogCode || ""} ${p.titleBg} ${p.titleEn} ${p.descriptionBg} ${p.slug}`.toLowerCase();
+      return hay.includes(query);
     });
-  }
+  }, [processes, q, hub]);
 
-  async function submit(sendToLecturers: boolean) {
-    setLoading(true);
-    setError("");
-    try {
-      const r = await fetch("/api/cases", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          processSlug,
-          period,
-          program,
-          funding,
-          sendToLecturers,
-          lines: lines.map((l) => ({
-            lecturerName: l.lecturerName,
-            lecturerEmail: l.lecturerEmail,
-            activity: l.activity,
-            hours: Number(l.hours),
-            rateEur: Number(l.rateEur),
-          })),
-        }),
-      });
-      const d = await r.json();
-      if (!r.ok) {
-        setError(d.error || "Failed");
-        return;
-      }
-      router.push(`/cases/${d.case.id}`);
-    } catch {
-      setError("Network error");
-    } finally {
-      setLoading(false);
+  const byHub = useMemo(() => {
+    const map = new Map<string, Process[]>();
+    for (const p of filtered) {
+      const list = map.get(p.hub) || [];
+      list.push(p);
+      map.set(p.hub, list);
     }
-  }
-
-  async function onSubmit(e: FormEvent) {
-    e.preventDefault();
-    await submit(true);
-  }
+    return HUBS.filter((h) => map.has(h.id)).map((h) => ({ hub: h, items: map.get(h.id) || [] }));
+  }, [filtered]);
 
   if (!ready || !user) return <div className="mx-auto max-w-6xl px-4 py-12">…</div>;
 
-  if (processes.length === 0) {
-    return (
-      <div className="mx-auto max-w-xl px-4 py-16 text-center">
-        <h1 className="font-display text-2xl font-bold">{t("newCaseTitle", lang)}</h1>
-        <p className="mt-4 text-ink/65">
-          {lang === "bg"
-            ? "Няма процеси, които твоята роля може да стартира (default deny)."
-            : "No processes your role may start (default deny)."}
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12">
+    <div className="mx-auto max-w-5xl px-4 py-12">
       <h1 className="font-display text-3xl font-bold">{t("newCaseTitle", lang)}</h1>
       <p className="mt-2 text-sm text-ink/60">
         {lang === "bg"
-          ? "Магьосник за образец 5.2 — натовареност / хонорари."
-          : "Wizard for form 5.2 — load / honorary pay."}
+          ? "Пълен каталог на бланките от Drive. Официалният шаблон не се променя — порталът го попълва."
+          : "Full Drive-blank catalog. Official templates stay unchanged — the portal fills them."}
       </p>
 
-      <form onSubmit={onSubmit} className="paper-card mt-8 space-y-5 p-6">
-        <div>
-          <label className="label">{lang === "bg" ? "Процес" : "Process"}</label>
-          <select className="field" value={processSlug} onChange={(e) => setProcessSlug(e.target.value)}>
-            {processes.map((p) => (
-              <option key={p.slug} value={p.slug}>
-                {lang === "bg" ? p.titleBg : p.titleEn}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className="label">{lang === "bg" ? "Период" : "Period"}</label>
-            <input className="field" value={period} onChange={(e) => setPeriod(e.target.value)} required />
-          </div>
-          <div>
-            <label className="label">{lang === "bg" ? "Програма" : "Program"}</label>
-            <input className="field" value={program} onChange={(e) => setProgram(e.target.value)} required />
-          </div>
-        </div>
-        <div>
-          <label className="label">{lang === "bg" ? "Източник на финансиране" : "Funding source"}</label>
-          <input className="field" value={funding} onChange={(e) => setFunding(e.target.value)} required />
-        </div>
+      <div className="mt-6 flex flex-wrap items-center gap-3">
+        <input
+          className="field max-w-sm"
+          placeholder={lang === "bg" ? "Търси код, заглавие…" : "Search code, title…"}
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
+        <select className="field max-w-xs" value={hub} onChange={(e) => setHub(e.target.value)}>
+          <option value="all">{lang === "bg" ? "Всички хъбове" : "All hubs"}</option>
+          {HUBS.map((h) => (
+            <option key={h.id} value={h.id}>
+              {lang === "bg" ? h.titleBg : h.titleEn}
+            </option>
+          ))}
+        </select>
+        <span className="text-xs text-ink/50">
+          {filtered.length} / {processes.length}
+        </span>
+      </div>
 
-        <div>
-          <div className="mb-2 flex items-center justify-between">
-            <label className="label mb-0">{lang === "bg" ? "Преподаватели / дейности" : "Lecturers / activities"}</label>
-            <button
-              type="button"
-              className="text-xs font-medium text-burgundy"
-              onClick={() => setLines((prev) => [...prev, emptyLine()])}
-            >
-              + {lang === "bg" ? "ред" : "row"}
-            </button>
-          </div>
-          <div className="space-y-3">
-            {lines.map((line, i) => (
-              <div key={i} className="rounded-xl border border-ink/10 bg-cream/40 p-3">
-                <div className="grid gap-2 sm:grid-cols-2">
-                  <input
-                    className="field"
-                    placeholder={lang === "bg" ? "Име" : "Name"}
-                    value={line.lecturerName}
-                    onChange={(e) => updateLine(i, { lecturerName: e.target.value })}
-                    required
-                  />
-                  <input
-                    className="field"
-                    placeholder="email"
-                    type="email"
-                    value={line.lecturerEmail}
-                    onChange={(e) => updateLine(i, { lecturerEmail: e.target.value })}
-                  />
-                  <select
-                    className="field"
-                    value={line.activity}
-                    onChange={(e) => updateLine(i, { activity: e.target.value })}
+      {processes.length === 0 && (
+        <p className="paper-card mt-8 p-8 text-center text-ink/55">
+          {lang === "bg"
+            ? "Няма процеси за твоята роля (default deny)."
+            : "No processes for your role (default deny)."}
+        </p>
+      )}
+
+      <div className="mt-8 space-y-10">
+        {byHub.map(({ hub: h, items }) => (
+          <section key={h.id}>
+            <h2 className="font-display text-xl font-semibold">{lang === "bg" ? h.titleBg : h.titleEn}</h2>
+            <p className="mt-1 text-sm text-ink/55">{lang === "bg" ? h.blurbBg : h.blurbEn}</p>
+            <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+              {items.map((p) => (
+                <li key={p.slug}>
+                  <Link
+                    href={`/cases/new/${p.slug}`}
+                    className="paper-card block h-full px-4 py-4 hover:bg-cream/50"
                   >
-                    {ACTIVITY_KEYS.map((k) => (
-                      <option key={k} value={k}>
-                        {lang === "bg" ? LOAD_ACTIVITY_RATES[k].labelBg : LOAD_ACTIVITY_RATES[k].labelEn}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="grid grid-cols-2 gap-2">
-                    <input
-                      className="field"
-                      type="number"
-                      step="0.5"
-                      min="0"
-                      placeholder={lang === "bg" ? "Часове" : "Hours"}
-                      value={line.hours}
-                      onChange={(e) => updateLine(i, { hours: e.target.value })}
-                      required
-                    />
-                    <input
-                      className="field"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      placeholder="EUR"
-                      value={line.rateEur}
-                      onChange={(e) => updateLine(i, { rateEur: e.target.value })}
-                    />
-                  </div>
-                </div>
-                {lines.length > 1 && (
-                  <button
-                    type="button"
-                    className="mt-2 text-xs text-ink/50 hover:text-burgundy"
-                    onClick={() => setLines((prev) => prev.filter((_, j) => j !== i))}
-                  >
-                    {lang === "bg" ? "Премахни" : "Remove"}
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {error && <p className="text-sm text-burgundy">{error}</p>}
-
-        <div className="flex flex-wrap gap-3">
-          <button type="submit" className="btn-primary" disabled={loading}>
-            {loading
-              ? "…"
-              : lang === "bg"
-                ? "Изпрати към преподавател"
-                : "Send to lecturer"}
-          </button>
-          <button
-            type="button"
-            className="btn-secondary"
-            disabled={loading}
-            onClick={() => submit(false)}
-          >
-            {lang === "bg" ? "Запази чернова" : "Save draft"}
-          </button>
-        </div>
-      </form>
+                    <div className="flex items-start justify-between gap-2">
+                      {p.catalogCode ? (
+                        <span className="rounded-md bg-burgundy/10 px-2 py-0.5 font-mono text-xs font-bold text-burgundy">
+                          {p.catalogCode}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-ink/40">—</span>
+                      )}
+                      {p.wizardKind === "load-5-2" && (
+                        <span className="text-[10px] uppercase tracking-wide text-sage">wizard</span>
+                      )}
+                    </div>
+                    <div className="mt-2 font-medium">{lang === "bg" ? p.titleBg : p.titleEn}</div>
+                    <div className="mt-1 line-clamp-2 text-xs text-ink/50">
+                      {lang === "bg" ? p.descriptionBg : p.descriptionEn}
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
     </div>
   );
 }

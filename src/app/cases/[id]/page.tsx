@@ -27,7 +27,9 @@ type CaseDetail = {
   arhimedNo: string | null;
   owner: { id: string; name: string; email: string };
   faculty: { nameBg: string; nameEn: string } | null;
-  process: { slug: string; titleBg: string; titleEn: string };
+  process: { slug: string; titleBg: string; titleEn: string; catalogCode?: string | null; fieldsJson?: string };
+  docPath: string | null;
+  metaJson: string;
   loadReport: {
     periodLabel: string;
     programName: string;
@@ -304,6 +306,50 @@ export default function CaseDetailPage() {
             {canAdmin && c.status === "ready_for_rector" && (
               <button type="button" className="btn-secondary" onClick={() => advance("archived")}>
                 {lang === "bg" ? "Архивирай (+ Архимед №)" : "Archive (+ Arhimed #)"}
+              </button>
+            )}
+          </div>
+          {error && <p className="mt-3 text-sm text-burgundy">{error}</p>}
+        </section>
+      )}
+
+      {!c.loadReport && (
+        <section className="paper-card mt-8 p-6">
+          <h2 className="font-display text-lg font-semibold">
+            {lang === "bg" ? "Данни от портала" : "Portal data"}
+          </h2>
+          <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+            {Object.entries((() => {
+              try {
+                const m = JSON.parse(c.metaJson || "{}");
+                return (m.fields || m) as Record<string, unknown>;
+              } catch {
+                return {} as Record<string, unknown>;
+              }
+            })()).filter(([k]) => k !== "loadLines" && k !== "docMethod").map(([k, v]) => (
+              <div key={k}>
+                <dt className="text-ink/45">{k}</dt>
+                <dd className="break-words">{typeof v === "boolean" ? (v ? "✓" : "—") : String(v ?? "")}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <a href={`/api/cases/${c.id}/document`} className="btn-secondary">
+              {lang === "bg" ? "Свали DOCX" : "Download DOCX"}
+            </a>
+            {canAdmin && c.status === "awaiting_approvals" && (
+              <button type="button" className="btn-secondary" onClick={() => advance("ready_for_rector")}>
+                {lang === "bg" ? "Одобрения OK → ректор" : "Approvals OK → rector"}
+              </button>
+            )}
+            {canAdmin && c.status === "ready_for_rector" && (
+              <button type="button" className="btn-secondary" onClick={() => advance("archived")}>
+                {lang === "bg" ? "Архивирай (+ Архимед №)" : "Archive (+ Arhimed #)"}
+              </button>
+            )}
+            {canAdmin && c.status === "draft" && (
+              <button type="button" className="btn-secondary" onClick={() => advance("awaiting_approvals")}>
+                {lang === "bg" ? "Подай" : "Submit"}
               </button>
             )}
           </div>

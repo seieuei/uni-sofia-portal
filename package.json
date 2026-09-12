@@ -14,7 +14,8 @@
     "setup": "prisma migrate deploy && tsx prisma/seed.ts",
     "start:prod": "bash scripts/start.sh",
     "template:5.2": "tsx scripts/build-5-2-template.ts",
-    "prebuild": "tsx scripts/build-5-2-template.ts && prisma generate"
+    "template:catalog": "python3 scripts/build-official-templates.py",
+    "prebuild": "tsx scripts/build-5-2-template.ts && python3 scripts/build-official-templates.py && prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
