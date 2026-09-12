@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { AuthShell } from "@/components/AuthShell";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 
 const sans = Source_Sans_3({
@@ -34,7 +35,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <div className="flex min-h-screen flex-col">
             <Header />
-            <main className="flex-1">{children}</main>
+            <main className="flex-1">
+              <AuthShell>{children}</AuthShell>
+            </main>
             <Footer />
           </div>
         </Providers>

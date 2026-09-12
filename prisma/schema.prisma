@@ -18,6 +18,7 @@ model Faculty {
   rules     RoutingRule[]
   profiles  Profile[]
   cases     Case[]
+  programs  Program[]
   createdAt DateTime       @default(now())
 }
 
@@ -93,10 +94,14 @@ model User {
   name         String
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
-  profile      Profile?
-  casesOwned   Case[]    @relation("CaseOwner")
-  stepsAssigned CaseStep[] @relation("StepAssignee")
-  events       CaseEvent[]
+  profile          Profile?
+  casesOwned       Case[]           @relation("CaseOwner")
+  stepsAssigned    CaseStep[]       @relation("StepAssignee")
+  events           CaseEvent[]
+  offeringsTaught  CourseOffering[] @relation("OfferingLecturer")
+  offeringsAssisted CourseOffering[] @relation("OfferingAssistant")
+  enrollments      Enrollment[]
+  electiveChoices  ElectiveChoice[]
 }
 
 model Profile {
@@ -240,4 +245,167 @@ model HandbookEntry {
   path        String?
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
+}
+
+// --- Academic / teaching desk ---
+
+model Program {
+  id                    String              @id @default(cuid())
+  code                  String              @unique
+  slug                  String              @unique
+  titleBg               String
+  titleEn               String
+  degree                String
+  professionalFieldBg   String?
+  professionalFieldEn   String?
+  facultyId             String
+  faculty               Faculty             @relation(fields: [facultyId], references: [id])
+  formOfStudy           String              @default("full-time")
+  semesters             Int                 @default(8)
+  noteBg                String?
+  noteEn                String?
+  versions              CurriculumVersion[]
+  createdAt             DateTime            @default(now())
+}
+
+model CurriculumVersion {
+  id              String             @id @default(cuid())
+  programId       String
+  program         Program            @relation(fields: [programId], references: [id], onDelete: Cascade)
+  academicYear    String
+  labelBg         String
+  labelEn         String
+  active          Boolean            @default(true)
+  courses         CurriculumCourse[]
+  offerings       CourseOffering[]
+  electiveWindows ElectiveWindow[]
+  createdAt       DateTime           @default(now())
+
+  @@unique([programId, academicYear])
+}
+
+model CurriculumCourse {
+  id            String           @id @default(cuid())
+  versionId     String
+  version       CurriculumVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  code          String
+  titleBg       String
+  titleEn       String
+  type          String
+  semester      Int
+  ects          Float
+  hoursTotal    Int
+  hoursLectures Int              @default(0)
+  hoursSeminars Int              @default(0)
+  hoursPractice Int              @default(0)
+  weeklyLoad    String
+  grading       String
+  language      String           @default("bg")
+  sortOrder     Int              @default(0)
+  offerings     CourseOffering[]
+  createdAt     DateTime         @default(now())
+
+  @@unique([versionId, code, semester])
+}
+
+model CourseOffering {
+  id             String           @id @default(cuid())
+  slug           String           @unique
+  courseId       String
+  course         CurriculumCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  versionId      String
+  version        CurriculumVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  academicYear   String
+  term           String
+  lecturerId     String?
+  lecturer       User?            @relation("OfferingLecturer", fields: [lecturerId], references: [id])
+  assistantId    String?
+  assistant      User?            @relation("OfferingAssistant", fields: [assistantId], references: [id])
+  room           String?
+  language       String           @default("bg")
+  assessmentForm String?
+  studentCount   Int              @default(0)
+  kind           String           @default("regular")
+  yearOfStudy    Int?
+  formOfStudy    String           @default("full-time")
+  examined       Int              @default(0)
+  currentAssessed Int             @default(0)
+  courseworks    Int              @default(0)
+  slots          ScheduleSlot[]
+  syllabus       Syllabus?
+  enrollments    Enrollment[]
+  electiveChoices ElectiveChoice[]
+  createdAt      DateTime         @default(now())
+}
+
+model ScheduleSlot {
+  id           String        @id @default(cuid())
+  offeringId   String
+  offering     CourseOffering @relation(fields: [offeringId], references: [id], onDelete: Cascade)
+  weekday      Int
+  startMinutes Int
+  endMinutes   Int
+  kind         String
+  room         String?
+}
+
+model Syllabus {
+  id               String         @id @default(cuid())
+  offeringId       String         @unique
+  offering         CourseOffering @relation(fields: [offeringId], references: [id], onDelete: Cascade)
+  annotationBg     String
+  annotationEn     String
+  prerequisitesBg  String?
+  prerequisitesEn  String?
+  outcomesBg       String?
+  outcomesEn       String?
+  gradingJson      String
+  loadJson         String
+  topicsJson       String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model Enrollment {
+  id         String         @id @default(cuid())
+  offeringId String
+  offering   CourseOffering @relation(fields: [offeringId], references: [id], onDelete: Cascade)
+  studentId  String
+  student    User           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status     String         @default("enrolled")
+  source     String         @default("compulsory")
+  createdAt  DateTime       @default(now())
+
+  @@unique([offeringId, studentId])
+}
+
+model ElectiveWindow {
+  id           String             @id @default(cuid())
+  slug         String             @unique
+  versionId    String
+  version      CurriculumVersion  @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  semester     Int
+  academicYear String
+  term         String
+  opensAt      DateTime
+  closesAt     DateTime
+  minEcts      Float              @default(0)
+  maxEcts      Float              @default(6)
+  titleBg      String
+  titleEn      String
+  choices      ElectiveChoice[]
+  createdAt    DateTime           @default(now())
+}
+
+model ElectiveChoice {
+  id         String         @id @default(cuid())
+  windowId   String
+  window     ElectiveWindow @relation(fields: [windowId], references: [id], onDelete: Cascade)
+  studentId  String
+  student    User           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  offeringId String
+  offering   CourseOffering @relation(fields: [offeringId], references: [id], onDelete: Cascade)
+  createdAt  DateTime       @default(now())
+
+  @@unique([windowId, studentId, offeringId])
 }
