@@ -1,0 +1,18 @@
+{
+  "name": "uni-sofia-portal",
+  "install": "npm install && (test -f .env || cp .env.example .env)",
+  "start": "npx prisma migrate deploy && npx tsx scripts/seed-if-empty.ts",
+  "terminals": [
+    {
+      "name": "next-dev",
+      "command": "npm run dev",
+      "description": "Next.js dev server on http://localhost:3000"
+    }
+  ],
+  "ports": [
+    {
+      "name": "web",
+      "port": 3000
+    }
+  ]
+}
