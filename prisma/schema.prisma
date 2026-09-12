@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Faculty {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  nameBg    String
+  nameEn    String
+  shortBg   String
+  shortEn   String
+  forms     FormTemplate[]
+  rules     RoutingRule[]
+  createdAt DateTime @default(now())
+}
+
+model Office {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  nameBg      String
+  nameEn      String
+  descriptionBg String?
+  descriptionEn String?
+  emailSim    String   // simulated inbox address
+  rules       RoutingRule[]
+  submissions Submission[]
+  createdAt   DateTime @default(now())
+}
+
+model FormTemplate {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  titleBg       String
+  titleEn       String
+  descriptionBg String
+  descriptionEn String
+  category      String   // academic | admin | housing | finance | admission
+  // JSON array of field defs: { name, labelBg, labelEn, type, required, options? }
+  fieldsJson    String
+  // which roles can see/fill this form (comma-separated)
+  roles         String
+  // optional faculty filter; null = all faculties
+  facultyId     String?
+  faculty       Faculty? @relation(fields: [facultyId], references: [id])
+  satireNoteBg  String?
+  satireNoteEn  String?
+  rules         RoutingRule[]
+  submissions   Submission[]
+  createdAt     DateTime @default(now())
+}
+
+model RoutingRule {
+  id          String       @id @default(cuid())
+  formId      String
+  form        FormTemplate @relation(fields: [formId], references: [id])
+  facultyId   String?
+  faculty     Faculty?     @relation(fields: [facultyId], references: [id])
+  // role or "*" for any
+  role        String
+  officeId    String
+  office      Office       @relation(fields: [officeId], references: [id])
+  priority    Int          @default(0)
+  noteBg      String?
+  noteEn      String?
+}
+
+model Submission {
+  id            String       @id @default(cuid())
+  ticketId      String       @unique
+  formId        String
+  form          FormTemplate @relation(fields: [formId], references: [id])
+  officeId      String
+  office        Office       @relation(fields: [officeId], references: [id])
+  role          String
+  facultyCode   String
+  submitterName String
+  submitterEmail String
+  // JSON of filled field values
+  dataJson      String
+  status        String       @default("received") // received | in_review | ping_pong | done
+  statusNoteBg  String?
+  statusNoteEn  String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}

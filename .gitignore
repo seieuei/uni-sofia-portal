@@ -1,0 +1,36 @@
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# debug
+# dependencies
+# local db & env
+# local env files
+# misc
+# next.js
+# production
+# testing
+# typescript
+# vercel
+*.db
+*.db-journal
+*.pem
+*.tsbuildinfo
+.DS_Store
+.env
+.env*.local
+.next/
+.pnp.js
+.vercel
+.yarn/install-state.gz
+/.next/
+/.pnp
+/build
+/coverage
+/node_modules
+/out/
+next-env.d.ts
+node_modules/
+npm-debug.log*
+prisma/dev.db
+prisma/dev.db-journal
+yarn-debug.log*
+yarn-error.log*

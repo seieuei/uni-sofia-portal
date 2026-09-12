@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cream: #f7f1e8;
+  --ink: #1c1410;
+  --burgundy: #7a1f2b;
+  --gold: #c4a35a;
+  --sage: #3d5a4c;
+  --paper: #fffdf8;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(122, 31, 43, 0.08), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, rgba(196, 163, 90, 0.12), transparent 50%),
+    var(--cream);
+  min-height: 100vh;
+}
+
+.font-display {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+}
+
+.paper-card {
+  @apply rounded-2xl border border-ink/10 bg-paper shadow-[0_1px_0_rgba(28,20,16,0.04),0_12px_40px_-24px_rgba(28,20,16,0.35)];
+}
+
+.stamp {
+  @apply inline-flex items-center gap-1 rounded-md border-2 border-burgundy/40 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-burgundy rotate-[-2deg];
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl bg-burgundy px-4 py-2.5 text-sm font-semibold text-cream shadow-sm transition hover:bg-burgundy/90 disabled:opacity-50;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl border border-ink/15 bg-white px-4 py-2.5 text-sm font-medium text-ink transition hover:bg-ink/5;
+}
+
+.field {
+  @apply w-full rounded-xl border border-ink/15 bg-white px-3 py-2.5 text-sm outline-none ring-burgundy/30 focus:ring-2;
+}
+
+.label {
+  @apply mb-1.5 block text-sm font-medium text-ink/80;
+}
