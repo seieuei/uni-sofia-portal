@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useApp } from "./Providers";
 import { ThemeToggle } from "./ThemeToggle";
 import { t } from "@/lib/i18n";
+import { academicNav } from "@/lib/academicUi";
 import { ROLES } from "@/lib/types";
 
 export function Header() {
@@ -18,14 +19,20 @@ export function Header() {
     { href: "/disclaimer", label: t("navDisclaimer", lang) },
   ];
 
-  const authLinks = [
-    { href: "/week", label: t("navWeek", lang) },
-    { href: "/inbox", label: t("navInbox", lang) },
-    { href: "/cases/new", label: t("navNewCase", lang) },
-    { href: "/cases", label: t("navCases", lang) },
-    { href: "/reports", label: t("navReports", lang) },
-    { href: "/handbook", label: t("navHandbook", lang) },
-  ];
+  const authLinks = user
+    ? academicNav(user.role, {
+        week: t("navWeek", lang),
+        inbox: t("navInbox", lang),
+        courses: t("navCourses", lang),
+        electives: t("navElectives", lang),
+        curriculum: t("navCurriculum", lang),
+        report: t("navReport", lang),
+        newCase: t("navNewCase", lang),
+        cases: t("navCases", lang),
+        reports: t("navReports", lang),
+        handbook: t("navHandbook", lang),
+      })
+    : [];
 
   const links = user ? authLinks : publicLinks;
 

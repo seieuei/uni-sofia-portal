@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import { spawnSync } from "child_process";
 import { seedProcesses } from "./seed-processes";
+import { seedAcademic } from "./seed-academic";
 import { generateCaseDocument, writeGenerated } from "../src/lib/portalDocx";
 import { catalogBySlug, fieldsFor, routeFor } from "../src/lib/catalog";
 import { routeStepPayload } from "../src/lib/processRoute";
@@ -39,6 +40,15 @@ async function main() {
   await ensureTemplate();
 
   // Clear Phase A + legacy tables (order matters for FKs)
+  await prisma.electiveChoice.deleteMany();
+  await prisma.enrollment.deleteMany();
+  await prisma.scheduleSlot.deleteMany();
+  await prisma.syllabus.deleteMany();
+  await prisma.courseOffering.deleteMany();
+  await prisma.electiveWindow.deleteMany();
+  await prisma.curriculumCourse.deleteMany();
+  await prisma.curriculumVersion.deleteMany();
+  await prisma.program.deleteMany();
   await prisma.loadLine.deleteMany();
   await prisma.loadReport.deleteMany();
   await prisma.caseEvent.deleteMany();
@@ -819,6 +829,8 @@ async function main() {
     });
     await attachGeneratedDoc(memo, memoProc, JSON.parse(memo.metaJson).fields, users.faculty_admin.name);
   }
+
+  await seedAcademic(prisma);
 
   const procCount = await prisma.processDefinition.count();
   console.log(

@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { spawnSync } from "child_process";
 import { seedProcesses } from "../prisma/seed-processes";
+import { seedAcademic } from "../prisma/seed-academic";
 
 const prisma = new PrismaClient();
 
@@ -29,6 +30,14 @@ async function main() {
   const result = await seedProcesses(prisma);
   const total = await prisma.processDefinition.count();
   console.log(`Process definitions in DB: ${total} (this boot: +${result.created} / ~${result.updated})`);
+
+  console.log("→ sync academic desk (idempotent upsert)");
+  const academic = await seedAcademic(prisma);
+  if (academic && "skipped" in academic && academic.skipped) {
+    console.log("Academic desk seed skipped.");
+  } else {
+    console.log("Academic desk seed upserted.");
+  }
 }
 
 main()

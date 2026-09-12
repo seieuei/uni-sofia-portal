@@ -9,6 +9,7 @@ import { t } from "@/lib/i18n";
 const DEMOS = [
   "program.admin@demo.uni-sofia.local",
   "lecturer@demo.uni-sofia.local",
+  "assistant@demo.uni-sofia.local",
   "faculty.admin@demo.uni-sofia.local",
   "student@demo.uni-sofia.local",
 ];

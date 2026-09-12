@@ -13,6 +13,7 @@ type Ev = {
   when: string;
   kind: string;
   href?: string;
+  room?: string | null;
 };
 
 export default function WeekPage() {
@@ -58,6 +59,7 @@ export default function WeekPage() {
               <div>
                 <div className="text-xs uppercase tracking-wide text-ink/45">{ev.kind}</div>
                 <div className="font-medium">{lang === "bg" ? ev.titleBg : ev.titleEn}</div>
+                {ev.room ? <div className="text-xs text-ink/45">{ev.room}</div> : null}
               </div>
               <div className="text-sm text-ink/60">
                 {new Date(ev.when).toLocaleString(lang === "bg" ? "bg-BG" : "en-GB", {
