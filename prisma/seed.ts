@@ -5,7 +5,8 @@ import path from "path";
 import { spawnSync } from "child_process";
 import { seedProcesses } from "./seed-processes";
 import { generateCaseDocument, writeGenerated } from "../src/lib/portalDocx";
-import { catalogBySlug, fieldsFor } from "../src/lib/catalog";
+import { catalogBySlug, fieldsFor, routeFor } from "../src/lib/catalog";
+import { routeStepPayload } from "../src/lib/processRoute";
 
 const prisma = new PrismaClient();
 
@@ -629,6 +630,8 @@ async function main() {
     },
   });
 
+  const cat52 = catalogBySlug("load-pay-5-2");
+  const official52 = cat52 ? routeFor(cat52).filter((s) => s.key !== "initiator") : [];
   await prisma.caseStep.createMany({
     data: [
       {
@@ -639,7 +642,7 @@ async function main() {
         status: "waiting",
         assigneeId: users.lecturer.id,
         sortOrder: 1,
-        payloadJson: JSON.stringify({ reportId: report.id }),
+        payloadJson: JSON.stringify({ reportId: report.id, phase: "approve" }),
       },
       {
         caseId: sampleCase.id,
@@ -649,31 +652,17 @@ async function main() {
         status: "pending",
         assigneeId: users.program_admin.id,
         sortOrder: 2,
+        payloadJson: JSON.stringify({ phase: "approve" }),
       },
-      {
+      ...official52.map((s, i) => ({
         caseId: sampleCase.id,
-        key: "legal",
-        titleBg: "Правен отдел (stub)",
-        titleEn: "Legal (stub)",
+        key: s.key,
+        titleBg: s.titleBg,
+        titleEn: s.titleEn,
         status: "pending",
-        sortOrder: 3,
-      },
-      {
-        caseId: sampleCase.id,
-        key: "pfc",
-        titleBg: "ПФЦ / финанси (stub)",
-        titleEn: "PFC / finance (stub)",
-        status: "pending",
-        sortOrder: 4,
-      },
-      {
-        caseId: sampleCase.id,
-        key: "rector",
-        titleBg: "Готово за ректор",
-        titleEn: "Ready for rector",
-        status: "pending",
-        sortOrder: 5,
-      },
+        sortOrder: 3 + i,
+        payloadJson: routeStepPayload(s),
+      })),
     ],
   });
 
@@ -717,12 +706,15 @@ async function main() {
           },
         }),
         steps: {
-          create: [
-            { key: "initiator", titleBg: "Инициатор", titleEn: "Initiator", status: "done", sortOrder: 1, assigneeId: users.lecturer.id },
-            { key: "domain", titleBg: "ЛСТО / Човешки ресурси", titleEn: "HR / LSTO", status: "waiting", sortOrder: 2 },
-            { key: "rector", titleBg: "Ректор", titleEn: "Rector", status: "pending", sortOrder: 3 },
-            { key: "archive", titleBg: "Архив", titleEn: "Archive", status: "pending", sortOrder: 4 },
-          ],
+          create: (catalogBySlug("p-2-9") ? routeFor(catalogBySlug("p-2-9")!) : []).map((s, i) => ({
+            key: s.key,
+            titleBg: s.titleBg,
+            titleEn: s.titleEn,
+            status: i === 0 ? "done" : i === 1 ? "waiting" : "pending",
+            sortOrder: i + 1,
+            assigneeId: i === 0 ? users.lecturer.id : null,
+            payloadJson: routeStepPayload(s),
+          })),
         },
       },
     });
@@ -760,12 +752,15 @@ async function main() {
           },
         }),
         steps: {
-          create: [
-            { key: "initiator", titleBg: "Инициатор", titleEn: "Initiator", status: "done", sortOrder: 1, assigneeId: users.student.id },
-            { key: "domain", titleBg: "Инспектор Студенти", titleEn: "Student inspector", status: "waiting", sortOrder: 2 },
-            { key: "dean", titleBg: "Декан — мнение", titleEn: "Dean opinion", status: "pending", sortOrder: 3, assigneeId: users.faculty_admin.id },
-            { key: "rector", titleBg: "Ректор", titleEn: "Rector", status: "pending", sortOrder: 4 },
-          ],
+          create: (catalogBySlug("p-3-5") ? routeFor(catalogBySlug("p-3-5")!) : []).map((s, i) => ({
+            key: s.key,
+            titleBg: s.titleBg,
+            titleEn: s.titleEn,
+            status: i === 0 ? "done" : i === 1 ? "waiting" : "pending",
+            sortOrder: i + 1,
+            assigneeId: i === 0 ? users.student.id : i === 3 ? users.faculty_admin.id : null,
+            payloadJson: routeStepPayload(s),
+          })),
         },
       },
     });
@@ -801,11 +796,15 @@ async function main() {
           },
         }),
         steps: {
-          create: [
-            { key: "initiator", titleBg: "Инициатор", titleEn: "Initiator", status: "done", sortOrder: 1, assigneeId: users.faculty_admin.id },
-            { key: "registry", titleBg: "Деловодство", titleEn: "Registry", status: "pending", sortOrder: 2 },
-            { key: "archive", titleBg: "Архив", titleEn: "Archive", status: "pending", sortOrder: 3 },
-          ],
+          create: (catalogBySlug("p-9-4") ? routeFor(catalogBySlug("p-9-4")!) : []).map((s, i) => ({
+            key: s.key,
+            titleBg: s.titleBg,
+            titleEn: s.titleEn,
+            status: i === 0 ? "done" : "pending",
+            sortOrder: i + 1,
+            assigneeId: i === 0 ? users.faculty_admin.id : null,
+            payloadJson: routeStepPayload(s),
+          })),
         },
       },
     });

@@ -31,7 +31,8 @@ export type CatalogField = {
   options?: { value: string; labelBg: string; labelEn: string }[];
 };
 
-export type RouteStepDef = { key: string; titleBg: string; titleEn: string };
+export type { RoutePhase, RouteStepDef } from "./processRoute";
+export { routeFor, copyPackFor, mergeCaseRoute, parseRouteJson } from "./processRoute";
 
 export type CatalogProcess = {
   slug: string;
@@ -2212,42 +2213,6 @@ export function fieldsFor(p: CatalogProcess): CatalogField[] {
       if (p.hasPayment) extra.push(FUNDING, AMOUNT, IBAN);
   }
   return [...COMMON_PERSON, ...extra];
-}
-
-export function routeFor(p: CatalogProcess): RouteStepDef[] {
-  const steps: RouteStepDef[] = [
-    { key: "initiator", titleBg: "Инициатор / изготвяне", titleEn: "Initiator / draft" },
-    { key: "registry", titleBg: "Деловодство (завеждане)", titleEn: "Registry (intake)" },
-  ];
-  if (p.hub === "training") {
-    steps.push({ key: "domain", titleBg: "Инспектор Студенти / Образователни дейности", titleEn: "Student inspector / Education dept." });
-    steps.push({ key: "dean", titleBg: "Декан — мнение", titleEn: "Dean opinion" });
-  } else if (p.hub === "phd") {
-    steps.push({ key: "domain", titleBg: "Сектор Докторанти", titleEn: "Doctoral office" });
-  } else if (p.hub === "career" || p.hub === "mywork") {
-    steps.push({ key: "domain", titleBg: "ЛСТО / Човешки ресурси", titleEn: "HR / LSTO" });
-  } else if (p.hub === "load" || p.hub === "contracts") {
-    steps.push({ key: "domain", titleBg: "Финансова политика / програмен админ", titleEn: "Finance policy / program admin" });
-  } else if (p.hub === "letters") {
-    if (p.catalogCode === "9.4") {
-      steps.push({ key: "archive", titleBg: "Към дело / архив", titleEn: "File / archive" });
-      return steps;
-    }
-    steps.push({ key: "vice_rector", titleBg: "Ресорен зам.-ректор", titleEn: "Vice-rector" });
-  }
-  if (p.hasLegal) {
-    steps.push({ key: "legal", titleBg: "Правен отдел / юрисконсулт", titleEn: "Legal / counsel" });
-  }
-  if (p.hasPayment) {
-    steps.push({ key: "pfc", titleBg: "Предварителен финансов контрол", titleEn: "Ex-ante financial control (PFC)" });
-  }
-  if (p.catalogCode !== "4.2") {
-    steps.push({ key: "rector", titleBg: "Ректор / упълномощен зам.-ректор", titleEn: "Rector / empowered vice-rector" });
-  } else {
-    steps.push({ key: "vice_rector", titleBg: "Зам.-ректор (без пълен ректорски кръг)", titleEn: "Vice-rector (no full Rector chain)" });
-  }
-  steps.push({ key: "archive", titleBg: "Извеждане + архив", titleEn: "Outgoing number + archive" });
-  return steps;
 }
 
 export function catalogBySlug(slug: string): CatalogProcess | undefined {

@@ -60,7 +60,10 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
     if (next === "archived") {
       await prisma.caseStep.updateMany({
-        where: { caseId: c.id, key: "rector" },
+        where: {
+          caseId: c.id,
+          key: { in: ["rector", "vice_rector", "izvejdane", "archive", "copies"] },
+        },
         data: { status: "done" },
       });
     }

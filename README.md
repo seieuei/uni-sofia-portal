@@ -102,7 +102,9 @@ Env: `DATABASE_URL` (default `file:./dev.db`) · `SESSION_SECRET`
 
 ## Workflow
 
-Generic: `draft` / `awaiting_approvals` → domain stub → Legal/PFC при плащане → Rector → archive.
+Generic: `draft` / `awaiting_approvals` → domain → Legal (ако трябва) → PFC при плащане → Rector → извеждане (Архимед) → архивен екземпляр (Изготвил + Съгласували) → **копия след извеждане** по каталога (Приложение №1).
+
+5.2 доклад: Декан → Деловодство → ПФЦ → Ректор (без Правен) → каса.
 
 5.2: `draft` → `awaiting_lecturer` → `awaiting_admin_review` → `awaiting_approvals` → `ready_for_rector` → `archived` (+ симулиран Архимед номер).
 

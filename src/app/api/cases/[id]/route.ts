@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser, isAdminRole } from "@/lib/auth";
+import { mergeCaseRoute, parseRouteJson } from "@/lib/processRoute";
 
 export const dynamic = "force-dynamic";
 
@@ -39,5 +40,16 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   if (!c) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (!canView(user, c)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  return NextResponse.json({ case: c });
+  const route = parseRouteJson(c.process.routeJson);
+  const steps = mergeCaseRoute(c.steps, route, c.status);
+  return NextResponse.json({
+    case: {
+      ...c,
+      steps,
+      process: {
+        ...c.process,
+        route,
+      },
+    },
+  });
 }

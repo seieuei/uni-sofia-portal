@@ -4,8 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useApp } from "@/components/Providers";
+import { RouteTimeline } from "@/components/RouteTimeline";
 import { statusLabel, t } from "@/lib/i18n";
 import { LOAD_ACTIVITY_RATES } from "@/lib/rates";
+import type { RoutePhase } from "@/lib/processRoute";
 
 type Line = {
   id: string;
@@ -27,7 +29,15 @@ type CaseDetail = {
   arhimedNo: string | null;
   owner: { id: string; name: string; email: string };
   faculty: { nameBg: string; nameEn: string } | null;
-  process: { slug: string; titleBg: string; titleEn: string; catalogCode?: string | null; fieldsJson?: string };
+  process: {
+    slug: string;
+    titleBg: string;
+    titleEn: string;
+    catalogCode?: string | null;
+    fieldsJson?: string;
+    routeJson?: string;
+    route?: { key: string; titleBg: string; titleEn: string; phase?: string; recipients?: string[] }[];
+  };
   docPath: string | null;
   metaJson: string;
   loadReport: {
@@ -44,6 +54,11 @@ type CaseDetail = {
     titleBg: string;
     titleEn: string;
     status: string;
+    phase?: RoutePhase;
+    recipients?: string[];
+    noteBg?: string;
+    noteEn?: string;
+    virtual?: boolean;
     assigneeId: string | null;
     assignee: { id: string; name: string; email: string } | null;
   }[];
@@ -360,21 +375,16 @@ export default function CaseDetailPage() {
       <section className="mt-8 grid gap-6 md:grid-cols-2">
         <div className="paper-card p-6">
           <h2 className="font-display text-lg font-semibold">
-            {lang === "bg" ? "Стъпки" : "Steps"}
+            {lang === "bg" ? "Маршрут" : "Route"}
           </h2>
-          <ul className="mt-3 space-y-2 text-sm">
-            {c.steps.map((s) => (
-              <li key={s.id} className="flex justify-between gap-2 rounded-lg bg-cream/60 px-3 py-2">
-                <span>
-                  {lang === "bg" ? s.titleBg : s.titleEn}
-                  {s.assignee ? (
-                    <span className="block text-xs text-ink/45">{s.assignee.name}</span>
-                  ) : null}
-                </span>
-                <span className="text-xs text-ink/50">{s.status}</span>
-              </li>
-            ))}
-          </ul>
+          <p className="mt-1 text-xs text-ink/45">
+            {lang === "bg"
+              ? "След подпис — извеждане в Архимед и официалните копия по каталога."
+              : "After the last signature — Arhimed outgoing register and the official copy pack."}
+          </p>
+          <div className="mt-3">
+            <RouteTimeline steps={c.steps} lang={lang} showStatus />
+          </div>
         </div>
         <div className="paper-card p-6">
           <h2 className="font-display text-lg font-semibold">
