@@ -17,9 +17,12 @@ export default function DisclaimerPage() {
               и не е свързан с администрацията, факултетите или информационните системи на университета.
             </p>
             <p>
-              Съдържанието е <strong>сатирично / мем</strong> и образователно демо на студентски портал. Не
-              събираме университетски акаунти, няма реален SSO, няма изпращане на истински имейли и няма
-              достъп до реални студентски данни.
+              Това е <strong>демо / пилот (Phase A)</strong> на работен портал за преписки. Демо акаунтите са
+              локални (SQLite) и не са университетски. Няма реален SSO към СУСИ / elearn / Архимед — порталът ги
+              <em> допълва</em>, не ги замества.
+            </p>
+            <p>
+              Демо парола за seed акаунти: <code className="rounded bg-cream px-1">demo1234</code>
             </p>
             <p>
               Официалният сайт е:{" "}
@@ -36,9 +39,12 @@ export default function DisclaimerPage() {
               Ohridski“, its faculties, or IT systems.
             </p>
             <p>
-              Content is <strong>satirical / meme</strong> plus an educational demo of a student portal. We do not
-              collect university credentials, there is no real SSO, no real email delivery, and no access to real
-              student data.
+              This is a <strong>demo / pilot (Phase A)</strong> work portal for cases. Demo accounts are local
+              (SQLite), not university accounts. There is no real SSO to SUSI / elearn / Arhimed — the portal
+              <em> complements</em> them, it does not replace them.
+            </p>
+            <p>
+              Demo password for seed accounts: <code className="rounded bg-cream px-1">demo1234</code>
             </p>
             <p>
               Official site:{" "}

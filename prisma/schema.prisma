@@ -8,83 +8,212 @@ datasource db {
 }
 
 model Faculty {
-  id        String   @id @default(cuid())
-  code      String   @unique
+  id        String         @id @default(cuid())
+  code      String         @unique
   nameBg    String
   nameEn    String
   shortBg   String
   shortEn   String
   forms     FormTemplate[]
   rules     RoutingRule[]
-  createdAt DateTime @default(now())
+  profiles  Profile[]
+  cases     Case[]
+  createdAt DateTime       @default(now())
 }
 
 model Office {
-  id          String   @id @default(cuid())
-  code        String   @unique
-  nameBg      String
-  nameEn      String
+  id            String       @id @default(cuid())
+  code          String       @unique
+  nameBg        String
+  nameEn        String
   descriptionBg String?
   descriptionEn String?
-  emailSim    String   // simulated inbox address
-  rules       RoutingRule[]
-  submissions Submission[]
-  createdAt   DateTime @default(now())
+  emailSim      String
+  rules         RoutingRule[]
+  submissions   Submission[]
+  createdAt     DateTime     @default(now())
 }
 
 model FormTemplate {
+  id            String         @id @default(cuid())
+  slug          String         @unique
+  titleBg       String
+  titleEn       String
+  descriptionBg String
+  descriptionEn String
+  category      String
+  fieldsJson    String
+  roles         String
+  facultyId     String?
+  faculty       Faculty?       @relation(fields: [facultyId], references: [id])
+  satireNoteBg  String?
+  satireNoteEn  String?
+  rules         RoutingRule[]
+  submissions   Submission[]
+  createdAt     DateTime       @default(now())
+}
+
+model RoutingRule {
+  id        String       @id @default(cuid())
+  formId    String
+  form      FormTemplate @relation(fields: [formId], references: [id])
+  facultyId String?
+  faculty   Faculty?     @relation(fields: [facultyId], references: [id])
+  role      String
+  officeId  String
+  office    Office       @relation(fields: [officeId], references: [id])
+  priority  Int          @default(0)
+  noteBg    String?
+  noteEn    String?
+}
+
+model Submission {
+  id             String       @id @default(cuid())
+  ticketId       String       @unique
+  formId         String
+  form           FormTemplate @relation(fields: [formId], references: [id])
+  officeId       String
+  office         Office       @relation(fields: [officeId], references: [id])
+  role           String
+  facultyCode    String
+  submitterName  String
+  submitterEmail String
+  dataJson       String
+  status         String       @default("received")
+  statusNoteBg   String?
+  statusNoteEn   String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  profile      Profile?
+  casesOwned   Case[]    @relation("CaseOwner")
+  stepsAssigned CaseStep[] @relation("StepAssignee")
+  events       CaseEvent[]
+}
+
+model Profile {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role       String   // student | lecturer | program_admin | faculty_admin | admin_staff | applicant
+  facultyId  String?
+  faculty    Faculty? @relation(fields: [facultyId], references: [id])
+  department String?  // department / program
+  year       Int?     // for students
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ProcessDefinition {
   id            String   @id @default(cuid())
   slug          String   @unique
   titleBg       String
   titleEn       String
   descriptionBg String
   descriptionEn String
-  category      String   // academic | admin | housing | finance | admission
-  // JSON array of field defs: { name, labelBg, labelEn, type, required, options? }
-  fieldsJson    String
-  // which roles can see/fill this form (comma-separated)
-  roles         String
-  // optional faculty filter; null = all faculties
-  facultyId     String?
-  faculty       Faculty? @relation(fields: [facultyId], references: [id])
-  satireNoteBg  String?
-  satireNoteEn  String?
-  rules         RoutingRule[]
-  submissions   Submission[]
+  // comma-separated roles that may start this process (default deny)
+  rolesAllowed  String
+  templatePath  String?
+  active        Boolean  @default(true)
+  cases         Case[]
   createdAt     DateTime @default(now())
 }
 
-model RoutingRule {
-  id          String       @id @default(cuid())
-  formId      String
-  form        FormTemplate @relation(fields: [formId], references: [id])
+model Case {
+  id          String            @id @default(cuid())
+  number      String            @unique
+  title       String
+  status      String            // draft | awaiting_lecturer | awaiting_admin_review | awaiting_approvals | ready_for_rector | archived
+  processId   String
+  process     ProcessDefinition @relation(fields: [processId], references: [id])
+  ownerId     String
+  owner       User              @relation("CaseOwner", fields: [ownerId], references: [id])
   facultyId   String?
-  faculty     Faculty?     @relation(fields: [facultyId], references: [id])
-  // role or "*" for any
-  role        String
-  officeId    String
-  office      Office       @relation(fields: [officeId], references: [id])
-  priority    Int          @default(0)
-  noteBg      String?
-  noteEn      String?
+  faculty     Faculty?          @relation(fields: [facultyId], references: [id])
+  metaJson    String            @default("{}")
+  arhimedNo   String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  steps       CaseStep[]
+  events      CaseEvent[]
+  loadReport  LoadReport?
 }
 
-model Submission {
-  id            String       @id @default(cuid())
-  ticketId      String       @unique
-  formId        String
-  form          FormTemplate @relation(fields: [formId], references: [id])
-  officeId      String
-  office        Office       @relation(fields: [officeId], references: [id])
-  role          String
-  facultyCode   String
-  submitterName String
-  submitterEmail String
-  // JSON of filled field values
-  dataJson      String
-  status        String       @default("received") // received | in_review | ping_pong | done
-  statusNoteBg  String?
-  statusNoteEn  String?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+model CaseStep {
+  id           String   @id @default(cuid())
+  caseId       String
+  case         Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  key          String   // e.g. confirm_hours, admin_review, legal, pfc, rector
+  titleBg      String
+  titleEn      String
+  status       String   @default("pending") // pending | waiting | done | skipped
+  assigneeId   String?
+  assignee     User?    @relation("StepAssignee", fields: [assigneeId], references: [id])
+  dueAt        DateTime?
+  payloadJson  String   @default("{}")
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model CaseEvent {
+  id        String   @id @default(cuid())
+  caseId    String
+  case      Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  actorId   String?
+  actor     User?    @relation(fields: [actorId], references: [id])
+  type      String
+  messageBg String
+  messageEn String
+  metaJson  String   @default("{}")
+  createdAt DateTime @default(now())
+}
+
+model LoadReport {
+  id            String     @id @default(cuid())
+  caseId        String     @unique
+  case          Case       @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  periodLabel   String
+  programName   String
+  fundingSource String
+  currency      String     @default("EUR")
+  totalAmount   Float      @default(0)
+  docPath       String?
+  lines         LoadLine[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model LoadLine {
+  id           String     @id @default(cuid())
+  reportId     String
+  report       LoadReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  lecturerName String
+  lecturerEmail String?
+  activity     String     // lectures | exercises | exams | consultations | other
+  hours        Float
+  rateEur      Float
+  amountEur    Float
+  confirmed    Boolean    @default(false)
+  note         String?
+  sortOrder    Int        @default(0)
+}
+
+model TemplateAsset {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  titleBg     String
+  titleEn     String
+  path        String
+  driveFileId String?
+  notes       String?
+  createdAt   DateTime @default(now())
 }

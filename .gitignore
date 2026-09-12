@@ -34,3 +34,4 @@ prisma/dev.db
 prisma/dev.db-journal
 yarn-debug.log*
 yarn-error.log*
+generated/

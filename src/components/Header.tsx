@@ -1,34 +1,46 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useApp } from "./Providers";
 import { t } from "@/lib/i18n";
-import { isStaff } from "@/lib/persona";
 import { ROLES } from "@/lib/types";
 
 export function Header() {
-  const { lang, setLang, persona } = useApp();
+  const { lang, setLang, user, logout, ready } = useApp();
   const path = usePathname();
+  const router = useRouter();
 
-  const links = [
+  const publicLinks = [
     { href: "/", label: t("navHome", lang) },
-    { href: "/onboarding", label: t("navOnboarding", lang) },
-    { href: "/dashboard", label: t("navDashboard", lang) },
-    { href: "/forms", label: t("navForms", lang) },
-    ...(persona && isStaff(persona.role) ? [{ href: "/inbox", label: t("navInbox", lang) }] : []),
-    { href: "/manifesto", label: t("navManifesto", lang) },
+    { href: "/how-it-works", label: t("navHow", lang) },
     { href: "/disclaimer", label: t("navDisclaimer", lang) },
   ];
 
-  const roleLabel = persona
-    ? ROLES.find((r) => r.id === persona.role)?.[lang === "bg" ? "labelBg" : "labelEn"]
+  const authLinks = [
+    { href: "/week", label: t("navWeek", lang) },
+    { href: "/inbox", label: t("navInbox", lang) },
+    { href: "/cases/new", label: t("navNewCase", lang) },
+    { href: "/cases", label: t("navCases", lang) },
+    { href: "/reports", label: t("navReports", lang) },
+    { href: "/handbook", label: t("navHandbook", lang) },
+  ];
+
+  const links = user ? authLinks : publicLinks;
+
+  const roleLabel = user
+    ? ROLES.find((r) => r.id === user.role)?.[lang === "bg" ? "labelBg" : "labelEn"]
     : null;
+
+  async function onLogout() {
+    await logout();
+    router.push("/");
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-ink/10 bg-cream/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
-        <Link href="/" className="group flex items-center gap-2">
+        <Link href={user ? "/week" : "/"} className="group flex items-center gap-2">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-burgundy text-sm font-bold text-cream shadow-sm">
             СУ*
           </span>
@@ -58,12 +70,21 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-2">
-          {roleLabel && (
+          {ready && roleLabel && (
             <span className="hidden rounded-full border border-ink/10 bg-white px-2.5 py-1 text-xs text-ink/70 sm:inline">
               {roleLabel}
-              {persona?.facultyCode ? ` · ${persona.facultyCode}` : ""}
+              {user?.facultyCode ? ` · ${user.facultyCode}` : ""}
             </span>
           )}
+          {ready && user ? (
+            <button type="button" onClick={onLogout} className="btn-secondary !px-2.5 !py-1.5 text-xs">
+              {t("navLogout", lang)}
+            </button>
+          ) : ready ? (
+            <Link href="/login" className="btn-primary !px-2.5 !py-1.5 text-xs">
+              {t("navLogin", lang)}
+            </Link>
+          ) : null}
           <div className="flex overflow-hidden rounded-lg border border-ink/15 bg-white text-xs font-medium">
             <button
               type="button"

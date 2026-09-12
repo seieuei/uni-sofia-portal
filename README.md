@@ -1,108 +1,99 @@
-# УниСофия Портал* (UniSofia Portal*)
+# УниСофия Портал* — Phase A
 
-Сатиричен / мем портал за Софийския университет „Св. Климент Охридски“, който същевременно демонстрира **нормален** студентски/админ портал: роля → релевантни форми → маршрутизация → билет → входяща кутия.
+Пилот на **сериозен работен портал** за Софийския университет (старт: Африканистика / ФКНФ).  
+Попълва официалните бланки през уеб UI. **Допълва** СУСИ / elearn / Архимед — **не** ги замества.
 
-> **Не е официален сайт.** Няма реален вход в СУ, няма истински имейли, няма университетски пароли.
+> **Не е официален сайт на СУ.** Демо акаунти. Без истински SSO.
 
-Официалният сайт на университета: [https://www.uni-sofia.bg](https://www.uni-sofia.bg)
-
----
-
-## Какво можеш да направиш тук
-
-1. **Начална страница** — любезен roast на бюрокрацията (бланки по имейл, липса на собственик, сайт за всеки факултет, имейл пинг-понг).
-2. **Онбординг** — избираш роля (студент / преподавател / админ / кандидат) и факултет. Записва се в cookie + localStorage.
-3. **Табло** — само връзки и форми за твоята роля.
-4. **Форми** — каталог, попълване, изпращане (симулация). Получаваш **билет** (ticket id) и виждаш към кой „офис“ е насочено.
-5. **Входящи** — за преподавател и админ персонал: списък с подадените форми.
-6. **Манифест + дисклеймър** — тонът и правните „не сме официални“.
-7. **БГ / EN** — превключвател горе вдясно.
+Официален сайт: [https://www.uni-sofia.bg](https://www.uni-sofia.bg)
 
 ---
 
-## Изисквания (веднъж)
+## Какво е Phase A
 
-На компютъра ти трябват:
+1. **Auth** — email + парола в SQLite (Prisma), JWT сесия в httpOnly cookie (`jose`).
+2. **Профил** — роля + факултет + катедра/програма (+ курс за студенти).
+3. **Навигация (вписани):** Начало/Моята седмица · Входящи · Нова преписка · Моите дела · Справки · Справочник
+4. **Процес 5.2** — Натовареност / хонорари: магьосник → потвърждение от преподавател → изчисление → DOCX.
+5. **Default deny** — показват се само процеси за matching роля.
+6. **Legacy forms** (`/forms`) — запазени и работещи.
 
-- [Node.js](https://nodejs.org/) **версия 18 или 20** (LTS)
-- npm (идва с Node)
+Публичният лендинг запазва лек афектен тон; authenticated зоната е сериозна.
 
-Проверка в терминал:
+---
+
+## Демо акаунти
+
+Парола за всички: **`demo1234`**
+
+| Email | Роля |
+|-------|------|
+| `program.admin@demo.uni-sofia.local` | program_admin |
+| `lecturer@demo.uni-sofia.local` | lecturer |
+| `faculty.admin@demo.uni-sofia.local` | faculty_admin |
+| `student@demo.uni-sofia.local` | student |
+
+Факултет: **FCML (ФКНФ)** · програма: **Африканистика**
+
+### Успешен сценарий
+
+1. Влез като `program.admin@…` → **Нова преписка** → 5.2 → изпрати към lecturer.
+2. Излез, влез като `lecturer@…` → **Входящи** → потвърди часовете.
+3. Обратно като admin → **Изчисли и генерирай DOCX** → свали документа.
+4. **Моята седмица** и **Входящи** показват релевантни елементи.
+
+Сийдът вече създава една примерна преписка `ПР-2609-10001` в статус `awaiting_lecturer`.
+
+---
+
+## Локално стартиране
 
 ```bash
-node -v
-npm -v
-```
-
----
-
-## Стартиране на локалния сайт (стъпка по стъпка)
-
-Отвори терминал и изпълни **по ред**:
-
-```bash
-# 1) Влез в папката на проекта
 cd uni-sofia-portal
-
-# 2) Инсталирай зависимостите
 npm install
-
-# 3) Създай базата данни и зареди примерни форми
-npx prisma migrate dev --name init
+npx prisma migrate dev
 npm run db:seed
-
-# 4) Стартирай сайта в режим за разработка
 npm run dev
 ```
 
-Отвори браузър: [http://localhost:3000](http://localhost:3000)
+Отвори [http://localhost:3000](http://localhost:3000)
 
-### Проверка преди „продакшън“ билд
+Проверка:
 
 ```bash
 npm run build
 npm start
 ```
 
+Env:
+
+- `DATABASE_URL` — default `file:./dev.db`
+- `SESSION_SECRET` — смени в продукция
+
 ---
 
-## Полезен сценарий за демо
+## Шаблон 5.2 (DOCX)
 
-1. Онбординг → роля **Студент**, факултет **ФМИ**.
-2. Отвори форма „Поправителен изпит“, попълни, изпрати → запиши билета.
-3. Онбординг → смени ролята на **Административен служител**.
-4. Отвори **Входящи** — билетът трябва да е там.
+- Път: `templates/official/5.2-honorary.docx`
+- Drive file id (официален бланк): `12PFiP5OBClZNDKxqG_GHHgsbGUcYlZi8` (Obrazec-5.2)
+- В билдa Drive **не** се дърпа; шаблонът е **структурен** DOCX с полетата на бланка, **без** претенция за пикселова идентичност.
+- Генериране на шаблона: `npx tsx scripts/build-5-2-template.ts`
+- Попълване: `docxtemplater` + `pizzip`
+
+---
+
+## Workflow 5.2
+
+`draft` → `awaiting_lecturer` → `awaiting_admin_review` → `awaiting_approvals` (Legal/PFC stubs) → `ready_for_rector` → `archived` (+ симулиран Архимед номер)
 
 ---
 
 ## Технологии
 
-- Next.js (App Router) + TypeScript + Tailwind CSS
-- Prisma + SQLite (файл `prisma/dev.db`)
-- Сийд: факултети, офиси, ~10 форми, правила за маршрутизация
-
----
-
-## Структура (накратко)
-
-| Път | Какво е |
-|-----|---------|
-| `/` | Сатиричен лендинг |
-| `/onboarding` | Избор на роля и факултет |
-| `/dashboard` | Персонализирано табло |
-| `/forms` | Каталог форми |
-| `/forms/[slug]` | Попълване и изпращане |
-| `/inbox` | Входящи за персонал |
-| `/manifesto` | Манифест |
-| `/disclaimer` | Дисклеймър |
-
-API: `/api/faculties`, `/api/forms`, `/api/forms/[slug]`, `/api/submissions`
-
----
-
-## Бележка за дизайна
-
-Оригинален UI (кремък, бордо, серифни заглавия). **Не** се копират логотипи или активи от uni-sofia.bg.
+- Next.js 14 (App Router) + TypeScript + Tailwind
+- Prisma + SQLite
+- `jose` (JWT cookie) + `bcryptjs`
+- `docxtemplater` / `pizzip`
 
 ---
 
@@ -110,22 +101,33 @@ API: `/api/faculties`, `/api/forms`, `/api/forms/[slug]`, `/api/submissions`
 
 1. Create a Railway project from this repo (Nixpacks build is fine).
 2. Add a **volume** mounted at `/data` so the SQLite file survives restarts.
-3. Set environment variable:
+3. Set environment variables:
    - `DATABASE_URL`=`file:/data/dev.db`
+   - `SESSION_SECRET`=`<long random string>`
 4. Railway will run `npm run build`, then `npm run start`, which:
    - runs `prisma migrate deploy`
-   - seeds **only if** there are no forms yet
+   - seeds **only if** there are no users/forms yet
    - starts Next.js on `0.0.0.0:${PORT}`
 
-Local production-style check (uses `file:./dev.db` from `.env`):
+Generated DOCX files land in `generated/` (ephemeral on Railway unless you mount that path too).
 
-```bash
-npm run build
-npm run start
-```
+---
+
+## Структура (накратко)
+
+| Път | Какво е |
+|-----|---------|
+| `/` | Лендинг (лек тон + дисклеймър) |
+| `/login` `/register` | Auth |
+| `/week` | Моята седмица |
+| `/inbox` | Входящи задачи |
+| `/cases/new` | Нова преписка (5.2 wizard) |
+| `/cases` `/cases/[id]` | Дела + timeline |
+| `/reports` `/handbook` | Обвивки |
+| `/forms` | Наследени демо форми |
 
 ---
 
 ## Лиценз / тон
 
-Демо проект с афектен roast. Ако си от СУ и се усмихнеш — мисията е изпълнена.
+Пилот с уважение към официалните бланки. Ако си от СУ и виждаш смисъл — мисията е на път.

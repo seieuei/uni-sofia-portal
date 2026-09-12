@@ -1,8 +1,37 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
+import fs from "fs";
+import path from "path";
+import { spawnSync } from "child_process";
 
 const prisma = new PrismaClient();
 
+async function ensureTemplate() {
+  const tpl = path.join(process.cwd(), "templates", "official", "5.2-honorary.docx");
+  if (!fs.existsSync(tpl)) {
+    console.log("Building 5.2 DOCX template…");
+    const r = spawnSync("npx", ["tsx", "scripts/build-5-2-template.ts"], {
+      stdio: "inherit",
+      env: process.env,
+      shell: process.platform === "win32",
+    });
+    if (r.status !== 0) throw new Error("Failed to build 5.2 template");
+  }
+}
+
 async function main() {
+  await ensureTemplate();
+
+  // Clear Phase A + legacy tables (order matters for FKs)
+  await prisma.loadLine.deleteMany();
+  await prisma.loadReport.deleteMany();
+  await prisma.caseEvent.deleteMany();
+  await prisma.caseStep.deleteMany();
+  await prisma.case.deleteMany();
+  await prisma.processDefinition.deleteMany();
+  await prisma.templateAsset.deleteMany();
+  await prisma.profile.deleteMany();
+  await prisma.user.deleteMany();
   await prisma.submission.deleteMany();
   await prisma.routingRule.deleteMany();
   await prisma.formTemplate.deleteMany();
@@ -11,30 +40,150 @@ async function main() {
 
   const faculties = await Promise.all(
     [
-      { code: "FMI", nameBg: "Факултет по математика и информатика", nameEn: "Faculty of Mathematics and Informatics", shortBg: "ФМИ", shortEn: "FMI" },
-      { code: "FF", nameBg: "Филологически факултет", nameEn: "Faculty of Philology", shortBg: "Филология", shortEn: "Philology" },
-      { code: "FJMC", nameBg: "Факултет по журналистика и масова комуникация", nameEn: "Faculty of Journalism and Mass Communication", shortBg: "ФЖМК", shortEn: "FJMC" },
-      { code: "LF", nameBg: "Юридически факултет", nameEn: "Faculty of Law", shortBg: "Право", shortEn: "Law" },
-      { code: "EF", nameBg: "Икономически факултет", nameEn: "Faculty of Economics and Business Administration", shortBg: "ИФ", shortEn: "Economics" },
-      { code: "HF", nameBg: "Исторически факултет", nameEn: "Faculty of History", shortBg: "История", shortEn: "History" },
-      { code: "BF", nameBg: "Биологически факултет", nameEn: "Faculty of Biology", shortBg: "Биология", shortEn: "Biology" },
-      { code: "GF", nameBg: "Геолого-географски факултет", nameEn: "Faculty of Geology and Geography", shortBg: "ГГФ", shortEn: "Geology" },
+      {
+        code: "FCML",
+        nameBg: "Факултет по класически и нови филологии",
+        nameEn: "Faculty of Classical and Modern Philology",
+        shortBg: "ФКНФ",
+        shortEn: "FCML",
+      },
+      {
+        code: "FMI",
+        nameBg: "Факултет по математика и информатика",
+        nameEn: "Faculty of Mathematics and Informatics",
+        shortBg: "ФМИ",
+        shortEn: "FMI",
+      },
+      {
+        code: "FF",
+        nameBg: "Филологически факултет",
+        nameEn: "Faculty of Philology",
+        shortBg: "Филология",
+        shortEn: "Philology",
+      },
+      {
+        code: "FJMC",
+        nameBg: "Факултет по журналистика и масова комуникация",
+        nameEn: "Faculty of Journalism and Mass Communication",
+        shortBg: "ФЖМК",
+        shortEn: "FJMC",
+      },
+      {
+        code: "LF",
+        nameBg: "Юридически факултет",
+        nameEn: "Faculty of Law",
+        shortBg: "Право",
+        shortEn: "Law",
+      },
+      {
+        code: "EF",
+        nameBg: "Икономически факултет",
+        nameEn: "Faculty of Economics and Business Administration",
+        shortBg: "ИФ",
+        shortEn: "Economics",
+      },
+      {
+        code: "HF",
+        nameBg: "Исторически факултет",
+        nameEn: "Faculty of History",
+        shortBg: "История",
+        shortEn: "History",
+      },
+      {
+        code: "BF",
+        nameBg: "Биологически факултет",
+        nameEn: "Faculty of Biology",
+        shortBg: "Биология",
+        shortEn: "Biology",
+      },
     ].map((f) => prisma.faculty.create({ data: f }))
   );
 
   const byCode = Object.fromEntries(faculties.map((f) => [f.code, f]));
+  const fcml = byCode.FCML;
 
   const offices = await Promise.all(
     [
-      { code: "student_affairs", nameBg: "Студентски отдел", nameEn: "Student Affairs Office", descriptionBg: "Където молбите ходят да си починат.", descriptionEn: "Where petitions go to rest.", emailSim: "student.affairs@sim.uni-sofia.local" },
-      { code: "academic_council", nameBg: "Учебен отдел", nameEn: "Academic Affairs", descriptionBg: "За всичко, което звучи „учебно“.", descriptionEn: "For anything that sounds academic.", emailSim: "academic@sim.uni-sofia.local" },
-      { code: "dean_office", nameBg: "Деканат", nameEn: "Dean’s Office", descriptionBg: "Подписът е свят. Печатът — още по-свят.", descriptionEn: "The signature is sacred. The stamp more so.", emailSim: "dean@sim.uni-sofia.local" },
-      { code: "finance", nameBg: "Финансов отдел", nameEn: "Finance Office", descriptionBg: "Такси, квитанции и леко напрежение.", descriptionEn: "Fees, receipts, and mild tension.", emailSim: "finance@sim.uni-sofia.local" },
-      { code: "dorms", nameBg: "Общежития и столове", nameEn: "Dormitories & Canteens", descriptionBg: "Леглото е мит. Опашката е реалност.", descriptionEn: "A bed is a myth. The queue is real.", emailSim: "dorms@sim.uni-sofia.local" },
-      { code: "admissions", nameBg: "Приемна комисия", nameEn: "Admissions Committee", descriptionBg: "Документите обичат да пътуват.", descriptionEn: "Documents love to travel.", emailSim: "admissions@sim.uni-sofia.local" },
-      { code: "hr", nameBg: "Човешки ресурси", nameEn: "Human Resources", descriptionBg: "За преподаватели и служители.", descriptionEn: "For lecturers and staff.", emailSim: "hr@sim.uni-sofia.local" },
-      { code: "it_helpdesk", nameBg: "ИТ поддръжка (симулирана)", nameEn: "IT Helpdesk (simulated)", descriptionBg: "Паролата е изтекла… преди 7 години.", descriptionEn: "Your password expired… 7 years ago.", emailSim: "it@sim.uni-sofia.local" },
-      { code: "library", nameBg: "Университетска библиотека", nameEn: "University Library", descriptionBg: "Книгата е налично, ако знаеш кой склад.", descriptionEn: "The book exists if you know which warehouse.", emailSim: "library@sim.uni-sofia.local" },
+      {
+        code: "student_affairs",
+        nameBg: "Студентски отдел",
+        nameEn: "Student Affairs Office",
+        descriptionBg: "Студентски молби и справки.",
+        descriptionEn: "Student petitions and certificates.",
+        emailSim: "student.affairs@sim.uni-sofia.local",
+      },
+      {
+        code: "academic_council",
+        nameBg: "Учебен отдел",
+        nameEn: "Academic Affairs",
+        descriptionBg: "Учебни процеси.",
+        descriptionEn: "Academic processes.",
+        emailSim: "academic@sim.uni-sofia.local",
+      },
+      {
+        code: "dean_office",
+        nameBg: "Деканат",
+        nameEn: "Dean’s Office",
+        descriptionBg: "Декански подписи и преписки.",
+        descriptionEn: "Dean signatures and cases.",
+        emailSim: "dean@sim.uni-sofia.local",
+      },
+      {
+        code: "finance",
+        nameBg: "Финансов отдел / ПФЦ",
+        nameEn: "Finance / PFC",
+        descriptionBg: "Хонорари и финансиране.",
+        descriptionEn: "Honoraria and funding.",
+        emailSim: "finance@sim.uni-sofia.local",
+      },
+      {
+        code: "legal",
+        nameBg: "Правен отдел",
+        nameEn: "Legal Office",
+        descriptionBg: "Правни становища (stub).",
+        descriptionEn: "Legal opinions (stub).",
+        emailSim: "legal@sim.uni-sofia.local",
+      },
+      {
+        code: "dorms",
+        nameBg: "Общежития и столове",
+        nameEn: "Dormitories & Canteens",
+        descriptionBg: "Общежития.",
+        descriptionEn: "Housing.",
+        emailSim: "dorms@sim.uni-sofia.local",
+      },
+      {
+        code: "admissions",
+        nameBg: "Приемна комисия",
+        nameEn: "Admissions Committee",
+        descriptionBg: "Прием.",
+        descriptionEn: "Admissions.",
+        emailSim: "admissions@sim.uni-sofia.local",
+      },
+      {
+        code: "hr",
+        nameBg: "Човешки ресурси",
+        nameEn: "Human Resources",
+        descriptionBg: "Преподаватели и служители.",
+        descriptionEn: "Lecturers and staff.",
+        emailSim: "hr@sim.uni-sofia.local",
+      },
+      {
+        code: "it_helpdesk",
+        nameBg: "ИТ поддръжка (симулирана)",
+        nameEn: "IT Helpdesk (simulated)",
+        descriptionBg: "ИТ заявки.",
+        descriptionEn: "IT requests.",
+        emailSim: "it@sim.uni-sofia.local",
+      },
+      {
+        code: "library",
+        nameBg: "Университетска библиотека",
+        nameEn: "University Library",
+        descriptionBg: "Библиотека.",
+        descriptionEn: "Library.",
+        emailSim: "library@sim.uni-sofia.local",
+      },
     ].map((o) => prisma.office.create({ data: o }))
   );
 
@@ -54,12 +203,12 @@ async function main() {
       slug: "exam-resit",
       titleBg: "Молба за явяване на поправителен изпит",
       titleEn: "Request for exam resit",
-      descriptionBg: "Класика. Попълваш, печаташ, носиш, връщат те за печат в цвят „син“.",
-      descriptionEn: "A classic. Fill, print, deliver, get sent back for a blue stamp.",
+      descriptionBg: "Попълване на молба за поправителен изпит.",
+      descriptionEn: "Fill a request for an exam resit.",
       category: "academic",
       roles: "student",
-      satireNoteBg: "Според легендата някой веднъж е получил отговор в същия семестър.",
-      satireNoteEn: "Legend says someone once got a reply in the same semester.",
+      satireNoteBg: null,
+      satireNoteEn: null,
       fieldsJson: JSON.stringify([
         field("fullName", "Име и фамилия", "Full name", "text"),
         field("fn", "Факултетен номер", "Student ID", "text"),
@@ -72,12 +221,12 @@ async function main() {
       slug: "transcript",
       titleBg: "Заявка за академична справка",
       titleEn: "Academic transcript request",
-      descriptionBg: "Справката е готова „скоро“. „Скоро“ е гъвкаво понятие.",
-      descriptionEn: "Ready „soon“. „Soon“ is a flexible concept.",
+      descriptionBg: "Заявка за академична справка.",
+      descriptionEn: "Request an academic transcript.",
       category: "admin",
       roles: "student,applicant",
-      satireNoteBg: "Може да се изисква бланка, която съществува само като PDF в нечий Outlook.",
-      satireNoteEn: "May require a form that only exists as a PDF in someone’s Outlook.",
+      satireNoteBg: null,
+      satireNoteEn: null,
       fieldsJson: JSON.stringify([
         field("fullName", "Име и фамилия", "Full name", "text"),
         field("fn", "Факултетен номер / ЕГН", "Student ID / national ID", "text"),
@@ -93,12 +242,12 @@ async function main() {
       slug: "dorm-application",
       titleBg: "Кандидатстване за общежитие",
       titleEn: "Dormitory application",
-      descriptionBg: "Точки, критерии и мистериозни списъци на вратата.",
-      descriptionEn: "Points, criteria, and mysterious lists on the door.",
+      descriptionBg: "Кандидатстване за общежитие.",
+      descriptionEn: "Apply for dormitory housing.",
       category: "housing",
       roles: "student",
-      satireNoteBg: "Ако получиш стая — поздравления. Ако не — също попълваш отново догодина.",
-      satireNoteEn: "If you get a room — congrats. If not — you’ll fill this again next year.",
+      satireNoteBg: null,
+      satireNoteEn: null,
       fieldsJson: JSON.stringify([
         field("fullName", "Име и фамилия", "Full name", "text"),
         field("fn", "Факултетен номер", "Student ID", "text"),
@@ -112,12 +261,12 @@ async function main() {
       slug: "fee-deferral",
       titleBg: "Молба за разсрочване на такса",
       titleEn: "Tuition fee deferral request",
-      descriptionBg: "Финансите обичат молби с печат. И още една молба.",
-      descriptionEn: "Finance loves stamped petitions. And another petition.",
+      descriptionBg: "Молба за разсрочване на такса.",
+      descriptionEn: "Request tuition fee deferral.",
       category: "finance",
       roles: "student",
-      satireNoteBg: "Маршрутът често е: факултет → финанси → обратно → „липсва подпис“.",
-      satireNoteEn: "Typical route: faculty → finance → back → „missing signature“.",
+      satireNoteBg: null,
+      satireNoteEn: null,
       fieldsJson: JSON.stringify([
         field("fullName", "Име и фамилия", "Full name", "text"),
         field("fn", "Факултетен номер", "Student ID", "text"),
@@ -130,12 +279,12 @@ async function main() {
       slug: "grade-appeal",
       titleBg: "Възражение срещу оценка",
       titleEn: "Grade appeal",
-      descriptionBg: "Дипломацията е умение. Тази форма те учи на него.",
-      descriptionEn: "Diplomacy is a skill. This form teaches it.",
+      descriptionBg: "Възражение срещу оценка.",
+      descriptionEn: "Appeal a grade.",
       category: "academic",
       roles: "student",
-      satireNoteBg: "Препоръчително е да не пишеш „системата е несправедлива“ в първото изречение.",
-      satireNoteEn: "Avoid opening with „the system is unfair“.",
+      satireNoteBg: null,
+      satireNoteEn: null,
       fieldsJson: JSON.stringify([
         field("fullName", "Име и фамилия", "Full name", "text"),
         field("fn", "Факултетен номер", "Student ID", "text"),
@@ -149,12 +298,12 @@ async function main() {
       slug: "leave-of-absence",
       titleBg: "Молба за прекъсване на обучението",
       titleEn: "Leave of absence request",
-      descriptionBg: "Животът се случва. Бюрокрацията също.",
-      descriptionEn: "Life happens. Bureaucracy also happens.",
+      descriptionBg: "Молба за прекъсване.",
+      descriptionEn: "Request a leave of absence.",
       category: "admin",
       roles: "student",
-      satireNoteBg: "Ще ти кажат „донеси медицинска“ дори когато причината е „съществувам“.",
-      satireNoteEn: "They may ask for a medical note even when the reason is „existing“.",
+      satireNoteBg: null,
+      satireNoteEn: null,
       fieldsJson: JSON.stringify([
         field("fullName", "Име и фамилия", "Full name", "text"),
         field("fn", "Факултетен номер", "Student ID", "text"),
@@ -167,12 +316,12 @@ async function main() {
       slug: "admission-docs",
       titleBg: "Подаване на документи за прием",
       titleEn: "Admissions document submission",
-      descriptionBg: "Папка, класьор, копие, оригинал, и още едно копие „за всеки случай“.",
-      descriptionEn: "Folder, binder, copy, original, and another copy „just in case“.",
+      descriptionBg: "Подаване на документи за прием.",
+      descriptionEn: "Submit admissions documents.",
       category: "admission",
       roles: "applicant",
-      satireNoteBg: "Сайтът на факултета казва едно. Централният — друго. Истината е в коридора.",
-      satireNoteEn: "The faculty site says one thing. Central says another. Truth lives in the hallway.",
+      satireNoteBg: null,
+      satireNoteEn: null,
       fieldsJson: JSON.stringify([
         field("fullName", "Име и фамилия", "Full name", "text"),
         field("email", "Имейл", "Email", "email"),
@@ -185,12 +334,12 @@ async function main() {
       slug: "room-booking",
       titleBg: "Заявка за зала / аудитория",
       titleEn: "Room / auditorium booking",
-      descriptionBg: "Залата е свободна. Освен ако не е. Никой не знае.",
-      descriptionEn: "The room is free. Unless it isn’t. Nobody knows.",
+      descriptionBg: "Заявка за зала.",
+      descriptionEn: "Book a room.",
       category: "admin",
-      roles: "lecturer,admin_staff",
-      satireNoteBg: "Календарът е в Excel. Или в главата на чичо от ключарницата.",
-      satireNoteEn: "The calendar is in Excel. Or in the locksmith uncle’s head.",
+      roles: "lecturer,program_admin,faculty_admin,admin_staff",
+      satireNoteBg: null,
+      satireNoteEn: null,
       fieldsJson: JSON.stringify([
         field("fullName", "Име на заявителя", "Requester name", "text"),
         field("email", "Имейл", "Email", "email"),
@@ -205,12 +354,12 @@ async function main() {
       slug: "equipment-request",
       titleBg: "Заявка за техника / проектор",
       titleEn: "Equipment / projector request",
-      descriptionBg: "Проекторът „работил миналата седмица“ е валидно състояние.",
-      descriptionEn: "„Worked last week“ is a valid projector state.",
+      descriptionBg: "Заявка за техника.",
+      descriptionEn: "Request equipment.",
       category: "admin",
-      roles: "lecturer,admin_staff",
-      satireNoteBg: "Кабелът HDMI е реликва. Носете си собствен — и адаптер за адаптера.",
-      satireNoteEn: "The HDMI cable is a relic. Bring your own — and an adapter for the adapter.",
+      roles: "lecturer,program_admin,faculty_admin,admin_staff",
+      satireNoteBg: null,
+      satireNoteEn: null,
       fieldsJson: JSON.stringify([
         field("fullName", "Име", "Name", "text"),
         field("email", "Имейл", "Email", "email"),
@@ -224,12 +373,12 @@ async function main() {
       slug: "library-renewal",
       titleBg: "Подновяване на библиотечен срок",
       titleEn: "Library loan renewal",
-      descriptionBg: "Книгата е при теб. Срокът — при библиотеката. Имейлът — някъде по пътя.",
-      descriptionEn: "You have the book. The library has the due date. Email is somewhere in between.",
+      descriptionBg: "Подновяване на библиотечен срок.",
+      descriptionEn: "Renew a library loan.",
       category: "academic",
       roles: "student,lecturer",
-      satireNoteBg: "Глобата расте по-бързо от GPA-то.",
-      satireNoteEn: "Fines grow faster than your GPA.",
+      satireNoteBg: null,
+      satireNoteEn: null,
       fieldsJson: JSON.stringify([
         field("fullName", "Име и фамилия", "Full name", "text"),
         field("readerId", "Читателски номер", "Reader ID", "text"),
@@ -255,8 +404,22 @@ async function main() {
     noteBg?: string;
     noteEn?: string;
   }[] = [
-    { formSlug: "exam-resit", role: "student", officeCode: "academic_council", noteBg: "Първо учебен отдел, после евентуално деканат.", noteEn: "Academic affairs first, maybe dean later." },
-    { formSlug: "exam-resit", facultyCode: "FMI", role: "student", officeCode: "dean_office", priority: 10, noteBg: "ФМИ често иска печат от деканата.", noteEn: "FMI often wants a dean stamp." },
+    {
+      formSlug: "exam-resit",
+      role: "student",
+      officeCode: "academic_council",
+      noteBg: "Първо учебен отдел.",
+      noteEn: "Academic affairs first.",
+    },
+    {
+      formSlug: "exam-resit",
+      facultyCode: "FMI",
+      role: "student",
+      officeCode: "dean_office",
+      priority: 10,
+      noteBg: "ФМИ често иска печат от деканата.",
+      noteEn: "FMI often wants a dean stamp.",
+    },
     { formSlug: "transcript", role: "*", officeCode: "student_affairs" },
     { formSlug: "dorm-application", role: "student", officeCode: "dorms" },
     { formSlug: "fee-deferral", role: "student", officeCode: "finance" },
@@ -264,6 +427,8 @@ async function main() {
     { formSlug: "leave-of-absence", role: "student", officeCode: "student_affairs" },
     { formSlug: "admission-docs", role: "applicant", officeCode: "admissions" },
     { formSlug: "room-booking", role: "lecturer", officeCode: "dean_office" },
+    { formSlug: "room-booking", role: "program_admin", officeCode: "academic_council" },
+    { formSlug: "room-booking", role: "faculty_admin", officeCode: "dean_office" },
     { formSlug: "room-booking", role: "admin_staff", officeCode: "academic_council" },
     { formSlug: "equipment-request", role: "*", officeCode: "it_helpdesk" },
     { formSlug: "library-renewal", role: "*", officeCode: "library" },
@@ -283,7 +448,219 @@ async function main() {
     });
   }
 
-  console.log(`Seeded ${faculties.length} faculties, ${offices.length} offices, ${forms.length} forms, ${rules.length} routing rules.`);
+  const passwordHash = await bcrypt.hash("demo1234", 10);
+
+  const demoUsers = [
+    {
+      email: "student@demo.uni-sofia.local",
+      name: "Мария Студентова",
+      role: "student",
+      department: "Африканистика",
+      year: 3,
+    },
+    {
+      email: "lecturer@demo.uni-sofia.local",
+      name: "д-р Иван Хонораров",
+      role: "lecturer",
+      department: "Африканистика",
+      year: null as number | null,
+    },
+    {
+      email: "program.admin@demo.uni-sofia.local",
+      name: "Елена Програмова",
+      role: "program_admin",
+      department: "Африканистика",
+      year: null,
+    },
+    {
+      email: "faculty.admin@demo.uni-sofia.local",
+      name: "проф. Петър Факултетов",
+      role: "faculty_admin",
+      department: "ФКНФ деканат",
+      year: null,
+    },
+  ];
+
+  const users: Record<string, { id: string; email: string; name: string; role: string }> = {};
+  for (const u of demoUsers) {
+    const created = await prisma.user.create({
+      data: {
+        email: u.email,
+        passwordHash,
+        name: u.name,
+        profile: {
+          create: {
+            role: u.role,
+            facultyId: fcml.id,
+            department: u.department,
+            year: u.year,
+          },
+        },
+      },
+    });
+    users[u.role] = { id: created.id, email: created.email, name: created.name, role: u.role };
+  }
+
+  const process = await prisma.processDefinition.create({
+    data: {
+      slug: "load-pay-5-2",
+      titleBg: "Натовареност / хонорари (образец 5.2)",
+      titleEn: "Load / honorary pay (form 5.2)",
+      descriptionBg:
+        "Събиране на часове за хонорувани преподаватели, потвърждение и генериране на официален DOCX.",
+      descriptionEn:
+        "Collect honorary lecturer hours, confirm, and generate an official-looking DOCX.",
+      rolesAllowed: "program_admin,faculty_admin",
+      templatePath: "templates/official/5.2-honorary.docx",
+      active: true,
+    },
+  });
+
+  await prisma.templateAsset.create({
+    data: {
+      code: "5.2-honorary",
+      titleBg: "Образец 5.2 — Натовареност / хонорари",
+      titleEn: "Form 5.2 — Load / honorary pay",
+      path: "templates/official/5.2-honorary.docx",
+      driveFileId: "12PFiP5OBClZNDKxqG_GHHgsbGUcYlZi8",
+      notes:
+        "Structural DOCX mirroring blank fields. Official Drive blank not fetched in build; not pixel-identical.",
+    },
+  });
+
+  // Sample 5.2 case in flight: awaiting lecturer confirmation
+  const sampleCase = await prisma.case.create({
+    data: {
+      number: "ПР-2609-10001",
+      title: "Натовареност 5.2 — Африканистика — зимен семестър 2025/26",
+      status: "awaiting_lecturer",
+      processId: process.id,
+      ownerId: users.program_admin.id,
+      facultyId: fcml.id,
+      metaJson: JSON.stringify({
+        period: "Зимен семестър 2025/26",
+        program: "Африканистика",
+        funding: "Факултетен бюджет / хонорари",
+      }),
+    },
+  });
+
+  const report = await prisma.loadReport.create({
+    data: {
+      caseId: sampleCase.id,
+      periodLabel: "Зимен семестър 2025/26",
+      programName: "Африканистика",
+      fundingSource: "Факултетен бюджет / хонорари",
+      currency: "EUR",
+      totalAmount: 0,
+      lines: {
+        create: [
+          {
+            lecturerName: users.lecturer.name,
+            lecturerEmail: users.lecturer.email,
+            activity: "lectures",
+            hours: 30,
+            rateEur: 25,
+            amountEur: 750,
+            confirmed: false,
+            sortOrder: 0,
+          },
+          {
+            lecturerName: users.lecturer.name,
+            lecturerEmail: users.lecturer.email,
+            activity: "exercises",
+            hours: 15,
+            rateEur: 18,
+            amountEur: 270,
+            confirmed: false,
+            sortOrder: 1,
+          },
+          {
+            lecturerName: users.lecturer.name,
+            lecturerEmail: users.lecturer.email,
+            activity: "exams",
+            hours: 8,
+            rateEur: 15,
+            amountEur: 120,
+            confirmed: false,
+            sortOrder: 2,
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.caseStep.createMany({
+    data: [
+      {
+        caseId: sampleCase.id,
+        key: "confirm_hours",
+        titleBg: "Потвърдете часовете си",
+        titleEn: "Confirm your hours",
+        status: "waiting",
+        assigneeId: users.lecturer.id,
+        sortOrder: 1,
+        payloadJson: JSON.stringify({ reportId: report.id }),
+      },
+      {
+        caseId: sampleCase.id,
+        key: "admin_review",
+        titleBg: "Админ преглед и изчисление",
+        titleEn: "Admin review & calculate",
+        status: "pending",
+        assigneeId: users.program_admin.id,
+        sortOrder: 2,
+      },
+      {
+        caseId: sampleCase.id,
+        key: "legal",
+        titleBg: "Правен отдел (stub)",
+        titleEn: "Legal (stub)",
+        status: "pending",
+        sortOrder: 3,
+      },
+      {
+        caseId: sampleCase.id,
+        key: "pfc",
+        titleBg: "ПФЦ / финанси (stub)",
+        titleEn: "PFC / finance (stub)",
+        status: "pending",
+        sortOrder: 4,
+      },
+      {
+        caseId: sampleCase.id,
+        key: "rector",
+        titleBg: "Готово за ректор",
+        titleEn: "Ready for rector",
+        status: "pending",
+        sortOrder: 5,
+      },
+    ],
+  });
+
+  await prisma.caseEvent.createMany({
+    data: [
+      {
+        caseId: sampleCase.id,
+        actorId: users.program_admin.id,
+        type: "created",
+        messageBg: "Преписката е създадена (демо сийд).",
+        messageEn: "Case created (demo seed).",
+      },
+      {
+        caseId: sampleCase.id,
+        actorId: users.program_admin.id,
+        type: "sent_to_lecturer",
+        messageBg: "Изпратено към преподавателя за потвърждение на часовете.",
+        messageEn: "Sent to lecturer to confirm hours.",
+      },
+    ],
+  });
+
+  console.log(
+    `Seeded ${faculties.length} faculties, ${offices.length} offices, ${forms.length} forms, ${Object.keys(users).length} users, process ${process.slug}, sample case ${sampleCase.number}.`
+  );
+  console.log("Demo password for all users: demo1234");
 }
 
 main()

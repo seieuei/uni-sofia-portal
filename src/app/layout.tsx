@@ -18,9 +18,9 @@ const display = Literata({
 });
 
 export const metadata: Metadata = {
-  title: "УниСофия Портал* — сатиричен демо портал",
+  title: "УниСофия Портал* — Phase A work portal (pilot)",
   description:
-    "Affectionate roast of Sofia University bureaucracy + a working demo student/admin portal. Not official.",
+    "Pilot work portal for Sofia University African Studies / FCML. Complements SUSI/elearn/Arhimed. Not official.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

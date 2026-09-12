@@ -10,7 +10,7 @@ export function readPersona(): Persona | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY) || getCookie(PERSONA_COOKIE);
     if (!raw) return null;
-    const p = JSON.parse(decodeURIComponent(raw)) as Persona;
+    const p = JSON.parse(raw.startsWith("%") ? decodeURIComponent(raw) : raw.startsWith("{") ? raw : decodeURIComponent(raw)) as Persona;
     if (!p.role || !p.facultyCode) return null;
     return p;
   } catch {
@@ -19,8 +19,8 @@ export function readPersona(): Persona | null {
 }
 
 export function writePersona(p: Persona) {
-  const raw = encodeURIComponent(JSON.stringify(p));
   localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+  const raw = encodeURIComponent(JSON.stringify(p));
   document.cookie = `${PERSONA_COOKIE}=${raw}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
 }
 
@@ -35,5 +35,10 @@ function getCookie(name: string): string | null {
 }
 
 export function isStaff(role: Role) {
-  return role === "lecturer" || role === "admin_staff";
+  return (
+    role === "lecturer" ||
+    role === "admin_staff" ||
+    role === "program_admin" ||
+    role === "faculty_admin"
+  );
 }

@@ -7,56 +7,75 @@ import { t } from "@/lib/i18n";
 const pains = ["pain1", "pain2", "pain3", "pain4"] as const;
 
 export default function LandingPage() {
-  const { lang, persona } = useApp();
+  const { lang, user } = useApp();
 
   return (
     <div>
       <section className="relative overflow-hidden">
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 md:grid-cols-[1.2fr_0.8fr] md:items-center md:py-24">
           <div>
-            <span className="stamp mb-4">{t("satireBadge", lang)} · MVP</span>
+            <span className="stamp mb-4">{t("satireBadge", lang)} · Phase A</span>
             <h1 className="font-display mt-4 text-4xl font-bold leading-tight text-ink md:text-5xl">
               {t("landingHero", lang)}
             </h1>
             <p className="mt-5 max-w-xl text-lg text-ink/70">{t("landingSub", lang)}</p>
+            <p className="mt-3 text-sm italic text-burgundy/80">{t("landingWitty", lang)}</p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/onboarding" className="btn-primary">
-                {t("ctaStart", lang)}
-              </Link>
-              {persona ? (
-                <Link href="/dashboard" className="btn-secondary">
+              {user ? (
+                <Link href="/week" className="btn-primary">
                   {t("ctaDashboard", lang)}
                 </Link>
               ) : (
-                <Link href="/forms" className="btn-secondary">
-                  {t("ctaForms", lang)}
+                <Link href="/login" className="btn-primary">
+                  {t("ctaStart", lang)}
                 </Link>
               )}
+              <Link href="/how-it-works" className="btn-secondary">
+                {t("ctaHow", lang)}
+              </Link>
             </div>
             <p className="mt-4 text-sm text-ink/50">{t("tagline", lang)}</p>
+            <div className="mt-6 rounded-xl border border-amber-700/20 bg-amber-50/80 px-4 py-3 text-sm text-ink/75">
+              {lang === "bg" ? (
+                <>
+                  <strong>Дисклеймър:</strong> Не е официален сайт на СУ. Демо акаунти с парола{" "}
+                  <code className="rounded bg-white px-1">demo1234</code>. Допълва СУСИ / elearn /
+                  Архимед — не ги замества.
+                </>
+              ) : (
+                <>
+                  <strong>Disclaimer:</strong> Not an official SU site. Demo accounts password{" "}
+                  <code className="rounded bg-white px-1">demo1234</code>. Complements SUSI / elearn /
+                  Arhimed — does not replace them.
+                </>
+              )}
+            </div>
           </div>
 
           <div className="paper-card relative p-6">
-            <div className="absolute -right-2 -top-2 stamp bg-cream">{lang === "bg" ? "БЕЗ ПЕЧАТ" : "NO STAMP"}</div>
-            <h2 className="font-display text-xl font-semibold">{lang === "bg" ? "Симулиран маршрутен лист" : "Simulated routing slip"}</h2>
-            <ul className="mt-4 space-y-3 text-sm">
+            <div className="absolute -right-2 -top-2 stamp bg-cream">
+              {lang === "bg" ? "ФКНФ пилот" : "FCML pilot"}
+            </div>
+            <h2 className="font-display text-xl font-semibold">
+              {lang === "bg" ? "Демо акаунти" : "Demo accounts"}
+            </h2>
+            <ul className="mt-4 space-y-2 text-sm">
               {[
-                lang === "bg" ? "1. Студент попълва форма" : "1. Student fills a form",
-                lang === "bg" ? "2. Правилото намира офиса" : "2. Rule finds the office",
-                lang === "bg" ? "3. Билет СУ-******" : "3. Ticket SU-******",
-                lang === "bg" ? "4. Персоналът го вижда във входящи" : "4. Staff sees it in inbox",
-                lang === "bg" ? "5. Никой не праща истински имейл ✨" : "5. Nobody sends a real email ✨",
-              ].map((step) => (
-                <li key={step} className="flex gap-3 rounded-xl bg-cream/80 px-3 py-2">
-                  <span className="text-burgundy">▸</span>
-                  <span>{step}</span>
+                ["program.admin@demo.uni-sofia.local", "program_admin"],
+                ["lecturer@demo.uni-sofia.local", "lecturer"],
+                ["faculty.admin@demo.uni-sofia.local", "faculty_admin"],
+                ["student@demo.uni-sofia.local", "student"],
+              ].map(([email, role]) => (
+                <li key={email} className="rounded-xl bg-cream/80 px-3 py-2">
+                  <div className="font-mono text-xs text-burgundy">{email}</div>
+                  <div className="text-ink/60">{role}</div>
                 </li>
               ))}
             </ul>
             <p className="mt-4 text-xs text-ink/50">
               {lang === "bg"
-                ? "Вдъхновено от реалността на СУ — без да копираме официалния сайт."
-                : "Inspired by SU reality — without copying the official site."}
+                ? "Парола за всички: demo1234 · Африканистика / ФКНФ"
+                : "Password for all: demo1234 · African Studies / FCML"}
             </p>
           </div>
         </div>
@@ -68,9 +87,13 @@ export default function LandingPage() {
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {pains.map((p) => (
               <article key={p} className="paper-card p-5">
-                <div className="mb-3 text-2xl">{p === "pain1" ? "📎" : p === "pain2" ? "👻" : p === "pain3" ? "🌐" : "🏓"}</div>
+                <div className="mb-3 text-2xl">
+                  {p === "pain1" ? "📄" : p === "pain2" ? "🧭" : p === "pain3" ? "🏛️" : "📥"}
+                </div>
                 <h3 className="font-semibold text-ink">{t(`${p}t` as "pain1t", lang)}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-ink/65">{t(`${p}d` as "pain1d", lang)}</p>
+                <p className="mt-2 text-sm leading-relaxed text-ink/65">
+                  {t(`${p}d` as "pain1d", lang)}
+                </p>
               </article>
             ))}
           </div>
@@ -91,11 +114,11 @@ export default function LandingPage() {
             ))}
           </ol>
           <div className="mt-10 flex flex-wrap gap-3">
-            <Link href="/onboarding" className="btn-primary">
+            <Link href="/login" className="btn-primary">
               {t("ctaStart", lang)}
             </Link>
-            <Link href="/manifesto" className="btn-secondary">
-              {t("navManifesto", lang)}
+            <Link href="/forms" className="btn-secondary">
+              {t("ctaForms", lang)}
             </Link>
           </div>
         </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import type { Lang, Persona } from "@/lib/types";
+import type { Lang, Persona, Role, SessionUser } from "@/lib/types";
 import { LANG_COOKIE } from "@/lib/types";
 import { clearPersona, readPersona, writePersona } from "@/lib/persona";
 import { pickLang } from "@/lib/i18n";
@@ -9,9 +9,12 @@ import { pickLang } from "@/lib/i18n";
 type Ctx = {
   lang: Lang;
   setLang: (l: Lang) => void;
+  user: SessionUser | null;
   persona: Persona | null;
   setPersona: (p: Persona) => void;
   resetPersona: () => void;
+  refreshUser: () => Promise<void>;
+  logout: () => Promise<void>;
   ready: boolean;
 };
 
@@ -27,14 +30,37 @@ function readLang(): Lang {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Lang>("bg");
+  const [user, setUser] = useState<SessionUser | null>(null);
   const [persona, setPersonaState] = useState<Persona | null>(null);
   const [ready, setReady] = useState(false);
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const r = await fetch("/api/auth/me");
+      const d = await r.json();
+      const u = d.user as SessionUser | null;
+      setUser(u);
+      if (u) {
+        const p: Persona = {
+          role: u.role,
+          facultyCode: u.facultyCode || "FCML",
+          name: u.name,
+          email: u.email,
+        };
+        writePersona(p);
+        setPersonaState(p);
+      }
+    } catch {
+      setUser(null);
+    }
+  }, []);
+
   useEffect(() => {
     setLangState(readLang());
-    setPersonaState(readPersona());
-    setReady(true);
-  }, []);
+    const legacy = readPersona();
+    setPersonaState(legacy);
+    refreshUser().finally(() => setReady(true));
+  }, [refreshUser]);
 
   const setLang = useCallback((l: Lang) => {
     setLangState(l);
@@ -52,9 +78,33 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setPersonaState(null);
   }, []);
 
+  const logout = useCallback(async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    clearPersona();
+    setUser(null);
+    setPersonaState(null);
+  }, []);
+
   const value = useMemo(
-    () => ({ lang, setLang, persona, setPersona, resetPersona, ready }),
-    [lang, setLang, persona, setPersona, resetPersona, ready]
+    () => ({
+      lang,
+      setLang,
+      user,
+      persona: user
+        ? {
+            role: user.role as Role,
+            facultyCode: user.facultyCode || "FCML",
+            name: user.name,
+            email: user.email,
+          }
+        : persona,
+      setPersona,
+      resetPersona,
+      refreshUser,
+      logout,
+      ready,
+    }),
+    [lang, setLang, user, persona, setPersona, resetPersona, refreshUser, logout, ready]
   );
 
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>;
