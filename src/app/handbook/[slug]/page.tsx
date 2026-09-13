@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useApp } from "@/components/Providers";
 import { STUDENT_ENROLMENT_FEES } from "@/content/handbook/student-fees";
 import { CENTRAL_ADMIN_CONTACTS, FCML_VICE_DEANS } from "@/content/contacts/central";
 import { ContactCard } from "@/components/ContactCard";
-import { FKNF_FACULTY_EVENTS } from "@/content/calendar/fknf-2026-27";
+import { FKNF_FACULTY_EVENTS, facultyEventId } from "@/content/calendar/fknf-2026-27";
 import { calendarTone, calendarToneClass } from "@/lib/calendar";
 
 type Entry = {
@@ -19,27 +19,32 @@ type Entry = {
   kind: string;
 };
 
+function weekHrefFor(when: string, eventId: string) {
+  const d = new Date(when);
+  const q = new URLSearchParams({
+    ref: d.toISOString(),
+    highlight: eventId,
+  });
+  return `/week?${q}`;
+}
+
 export default function HandbookSlugPage() {
   const { slug } = useParams<{ slug: string }>();
-  const { lang, user, ready } = useApp();
-  const router = useRouter();
+  const { lang, ready } = useApp();
   const [entry, setEntry] = useState<Entry | null>(null);
 
   useEffect(() => {
     if (!ready) return;
-    if (!user) {
-      router.replace("/login");
-      return;
-    }
     fetch("/api/handbook")
       .then((r) => r.json())
       .then((d) => {
         const found = (d.entries || []).find((e: Entry) => e.slug === slug);
         setEntry(found || null);
-      });
-  }, [ready, user, router, slug]);
+      })
+      .catch(() => setEntry(null));
+  }, [ready, slug]);
 
-  if (!ready || !user) return <div className="mx-auto max-w-6xl px-4 py-12">…</div>;
+  if (!ready) return <div className="mx-auto max-w-6xl px-4 py-12">…</div>;
 
   const title = entry ? (lang === "bg" ? entry.titleBg : entry.titleEn) : slug;
 
@@ -67,6 +72,26 @@ export default function HandbookSlugPage() {
             <p className="font-mono text-sm font-semibold tracking-wide">IBAN BG52BNBG96613100174301</p>
             <p className="mt-1 text-xs text-ink/55">BIC BNBGBGSD · {lang === "bg" ? "БНБ — централно управление" : "BNB — head office"}</p>
           </div>
+          <div className="paper-card p-4 text-sm">
+            <p className="font-medium text-ink/80">
+              {lang === "bg" ? "Срокове в календара" : "Deadlines in the calendar"}
+            </p>
+            <ul className="mt-2 space-y-1.5">
+              {FKNF_FACULTY_EVENTS.map((ev, i) => ({ ev, i }))
+                .filter(({ ev }) => ev.href === "/handbook/student-enrolment-fees")
+                .map(({ ev, i }) => {
+                  const id = facultyEventId(ev, i);
+                  return (
+                    <li key={id} className="flex flex-wrap items-center justify-between gap-2">
+                      <span>{lang === "bg" ? ev.titleBg : ev.titleEn}</span>
+                      <Link href={weekHrefFor(ev.when, id)} className="text-burgundy hover:underline">
+                        {lang === "bg" ? "виж в календара →" : "view in calendar →"}
+                      </Link>
+                    </li>
+                  );
+                })}
+            </ul>
+          </div>
         </div>
       )}
 
@@ -78,6 +103,9 @@ export default function HandbookSlugPage() {
           <Link href="/contacts" className="sm:col-span-2 text-sm text-burgundy hover:underline">
             {lang === "bg" ? "Пълна страница Контакти →" : "Full Contacts page →"}
           </Link>
+          <Link href="/map" className="sm:col-span-2 text-sm text-burgundy hover:underline">
+            {lang === "bg" ? "Карта на Ректората →" : "Rectorate map →"}
+          </Link>
         </div>
       )}
 
@@ -85,16 +113,27 @@ export default function HandbookSlugPage() {
         <ul className="mt-8 space-y-2">
           {FKNF_FACULTY_EVENTS.map((ev, i) => {
             const tone = calendarTone(ev.kind);
+            const id = facultyEventId(ev, i);
             return (
-              <li key={i} className={`rounded-xl border px-3 py-2 text-sm ${calendarToneClass(tone)}`}>
-                <span className="font-medium">{lang === "bg" ? ev.titleBg : ev.titleEn}</span>
-                <span className="mt-0.5 block text-xs opacity-90">
-                  {new Date(ev.when).toLocaleString(lang === "bg" ? "bg-BG" : "en-GB", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })}
-                  {ev.room ? ` · ${ev.room}` : ""}
-                </span>
+              <li key={id} className={`rounded-xl border px-3 py-2 text-sm ${calendarToneClass(tone)}`}>
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div>
+                    <span className="font-medium">{lang === "bg" ? ev.titleBg : ev.titleEn}</span>
+                    <span className="mt-0.5 block text-xs opacity-90">
+                      {new Date(ev.when).toLocaleString(lang === "bg" ? "bg-BG" : "en-GB", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
+                      {ev.room ? ` · ${ev.room}` : ""}
+                    </span>
+                  </div>
+                  <Link
+                    href={weekHrefFor(ev.when, id)}
+                    className="shrink-0 rounded-lg bg-white/20 px-2 py-1 text-[11px] font-medium hover:bg-white/30 dark:bg-night/20"
+                  >
+                    {lang === "bg" ? "виж в календара" : "view in calendar"}
+                  </Link>
+                </div>
               </li>
             );
           })}
@@ -111,6 +150,9 @@ export default function HandbookSlugPage() {
               {FCML_VICE_DEANS.map((c) => (
                 <ContactCard key={c.roleBg} person={c} lang={lang} />
               ))}
+              <Link href="/map?q=232" className="text-sm text-burgundy hover:underline">
+                {lang === "bg" ? "Покажи каб. 232 на картата →" : "Show room 232 on the map →"}
+              </Link>
             </div>
           ) : null}
         </div>

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useApp } from "@/components/Providers";
 import { CalendarLegend } from "@/components/CalendarLegend";
 import { calendarTone, calendarToneClass, calendarToneLabel } from "@/lib/calendar";
@@ -33,11 +33,28 @@ function mondayOf(d: Date) {
   return start;
 }
 
-export default function WeekPage() {
+function WeekInner() {
   const { lang, user, ready } = useApp();
   const router = useRouter();
+  const params = useSearchParams();
+  const highlight = params.get("highlight") || "";
+  const refParam = params.get("ref");
+
   const [events, setEvents] = useState<Ev[]>([]);
-  const [weekStart, setWeekStart] = useState(() => mondayOf(new Date()));
+  const [weekStart, setWeekStart] = useState(() => {
+    if (refParam) {
+      const d = new Date(refParam);
+      if (!Number.isNaN(d.getTime())) return mondayOf(d);
+    }
+    return mondayOf(new Date());
+  });
+
+  useEffect(() => {
+    if (refParam) {
+      const d = new Date(refParam);
+      if (!Number.isNaN(d.getTime())) setWeekStart(mondayOf(d));
+    }
+  }, [refParam]);
 
   useEffect(() => {
     if (!ready) return;
@@ -134,6 +151,14 @@ export default function WeekPage() {
         </div>
       </div>
 
+      {highlight && (
+        <p className="mt-4 rounded-lg border border-burgundy/25 bg-burgundy/5 px-3 py-2 text-xs text-burgundy">
+          {lang === "bg"
+            ? "Маркирано събитие от справочника / календара ФКНФ."
+            : "Highlighted event from the handbook / FCML calendar."}
+        </p>
+      )}
+
       <RoleHomeCards user={user} lang={lang} />
 
       <div className="mt-6">
@@ -153,8 +178,13 @@ export default function WeekPage() {
               <ul className="mt-2 space-y-1.5">
                 {dayEvents.map((ev) => {
                   const tone = calendarTone(ev.kind);
+                  const isHi = highlight && ev.id === highlight;
                   const inner = (
-                    <div className={`rounded-lg border px-2 py-1.5 ${calendarToneClass(tone)}`}>
+                    <div
+                      className={`rounded-lg border px-2 py-1.5 ${calendarToneClass(tone)} ${
+                        isHi ? "ring-2 ring-offset-1 ring-gold ring-offset-cream dark:ring-offset-night" : ""
+                      }`}
+                    >
                       <div className="text-[10px] opacity-80">
                         {tone === "holiday"
                           ? calendarToneLabel(tone, lang)
@@ -165,7 +195,7 @@ export default function WeekPage() {
                     </div>
                   );
                   return (
-                    <li key={ev.id}>
+                    <li key={ev.id} id={ev.id}>
                       {ev.href ? (
                         <Link href={ev.href} className="block hover:opacity-90">
                           {inner}
@@ -183,5 +213,13 @@ export default function WeekPage() {
         })}
       </div>
     </div>
+  );
+}
+
+export default function WeekPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-6xl px-4 py-12 text-ink/50">…</div>}>
+      <WeekInner />
+    </Suspense>
   );
 }

@@ -24,6 +24,12 @@ export default function ContactsPage() {
         <Link href="/faculties/fcml/contacts" className="rounded-full bg-ink/5 px-3 py-1 text-ink/70 hover:bg-ink/10">
           {lang === "bg" ? "Хъб ФКНФ →" : "FCML hub →"}
         </Link>
+        <Link href="/map" className="rounded-full bg-burgundy/10 px-3 py-1 text-burgundy hover:bg-burgundy/15">
+          {lang === "bg" ? "Карта / зали →" : "Map / rooms →"}
+        </Link>
+        <Link href="/handbook" className="rounded-full bg-ink/5 px-3 py-1 text-ink/70 hover:bg-ink/10">
+          {lang === "bg" ? "Справочник →" : "Handbook →"}
+        </Link>
         <Link href="/structure" className="rounded-full bg-ink/5 px-3 py-1 text-ink/70 hover:bg-ink/10">
           {lang === "bg" ? "Структура →" : "Structure →"}
         </Link>
@@ -52,7 +58,10 @@ export default function ContactsPage() {
         <p className="mt-1 text-xs text-ink/45">
           {lang === "bg"
             ? "От fknf-vice-deans.pdf. Каб. 232, Ректорат."
-            : "From fknf-vice-deans.pdf. Room 232, Rectorate."}
+            : "From fknf-vice-deans.pdf. Room 232, Rectorate."}{" "}
+          <Link href="/map?q=232" className="text-burgundy hover:underline">
+            {lang === "bg" ? "Покажи на картата" : "Show on map"}
+          </Link>
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <ContactCard person={FCML_DEAN} lang={lang} highlight />

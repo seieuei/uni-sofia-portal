@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { ContactPerson } from "@/content/contacts/central";
 import type { Lang } from "@/lib/types";
 
@@ -23,7 +24,10 @@ export function ContactCard({
       <ul className="mt-2 space-y-1 text-sm text-ink/70">
         {person.room && (
           <li>
-            {lang === "bg" ? "Стая" : "Room"} {person.room}
+            {lang === "bg" ? "Стая" : "Room"}{" "}
+            <Link href={`/map?q=${encodeURIComponent(person.room)}`} className="text-burgundy hover:underline">
+              {person.room}
+            </Link>
           </li>
         )}
         {person.phones?.map((ph) => (

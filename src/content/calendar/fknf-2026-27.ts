@@ -145,12 +145,17 @@ export const FKNF_FACULTY_EVENTS: Omit<CalendarEvent, "id">[] = [
   },
 ];
 
+export function facultyEventId(ev: Omit<CalendarEvent, "id">, index: number): string {
+  return `fknf-${index}-${ev.when}`;
+}
+
+/** All handbook / FCML faculty events overlapping [start, end] (single source of truth). */
 export function facultyEventsInRange(start: Date, end: Date): CalendarEvent[] {
-  return FKNF_FACULTY_EVENTS.filter((ev) => {
-    const t = new Date(ev.when).getTime();
-    return t >= start.getTime() && t <= end.getTime();
-  }).map((ev, i) => ({
-    ...ev,
-    id: `fknf-${ev.when}-${i}`,
-  }));
+  const s = start.getTime();
+  const e = end.getTime();
+  return FKNF_FACULTY_EVENTS.map((ev, i) => ({ ...ev, id: facultyEventId(ev, i) })).filter((ev) => {
+    const t0 = new Date(ev.when).getTime();
+    const t1 = ev.end ? new Date(ev.end).getTime() : t0;
+    return t0 <= e && t1 >= s;
+  });
 }

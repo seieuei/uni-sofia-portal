@@ -122,17 +122,19 @@ export function academicNav(role: Role, labels: Record<string, string>) {
   const structure = { href: "/structure", label: labels.structure };
   const admissions = { href: "/admissions", label: labels.admissions };
   const faculties = { href: "/faculties", label: labels.faculties };
+  const map = { href: "/map", label: labels.map || labels.handbook };
+  const contacts = { href: "/contacts", label: labels.contacts || "Contacts" };
 
   if (role === "student") {
-    return [week, inbox, courses, electives, curriculum, cases, journey, admissions, structure];
+    return [week, inbox, courses, electives, curriculum, cases, handbook, map, journey, admissions, structure];
   }
   if (role === "lecturer") {
-    return [week, inbox, courses, curriculum, report, cases, structure];
+    return [week, inbox, courses, curriculum, report, cases, handbook, map, structure];
   }
   if (role === "applicant") {
-    return [week, inbox, newCase, cases, journey, admissions, faculties, structure];
+    return [week, inbox, newCase, cases, handbook, map, journey, admissions, faculties, structure];
   }
-  return [week, inbox, newCase, cases, curriculum, reports, handbook, structure];
+  return [week, inbox, newCase, cases, curriculum, reports, handbook, map, contacts, structure];
 }
 
 export const APP_CALENDAR_PREFIXES = [
