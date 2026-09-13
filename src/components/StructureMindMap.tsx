@@ -9,6 +9,9 @@ import { getUchPlan } from "@/content/curriculum";
 import { UchPlanTable } from "./UchPlanTable";
 
 type Laid = { node: StructureNode; x: number; y: number; parent?: Laid };
+type DragState = { x: number; y: number; px: number; py: number };
+type NodeKind = NonNullable<StructureNode["kind"]>;
+type IdSet = Set<string>;
 
 function hash01(id: string) {
   let h = 0;
@@ -51,7 +54,7 @@ function layoutRadial(root: StructureNode, expanded: Set<string>, cx: number, cy
   return out;
 }
 
-function inferKind(node: StructureNode): NonNullable<StructureNode["kind"]> {
+function inferKind(node: StructureNode): NodeKind {
   if (node.kind) return node.kind;
   if (node.id === "university") return "root";
   if (node.programSlug || node.degree) return "program";
@@ -74,12 +77,12 @@ export function StructureMindMap({
     return path.length ? path : ["university", "faculties", "FCML"];
   }, [facultyCode]);
 
-  const [expanded, setExpanded] = useState<Set<string>>(
+  const [expanded, setExpanded] = useState<IdSet>(
     () => new Set(["university", "faculties", "FCML", "fcml-ba", "FFIL", ...highlightPath])
   );
-  const [selected, setSelected] = useState<string>(facultyCode === "FFIL" ? "FFIL" : "FCML");
+  const [selected, setSelected] = useState(facultyCode === "FFIL" ? "FFIL" : "FCML");
   const [pan, setPan] = useState({ x: 40, y: 20, k: 0.85 });
-  const drag = useRef<{ x: number; y: number; px: number; py: number } | null>(null);
+  const drag = useRef(null as DragState | null);
 
   const W = 1600;
   const H = 1200;
@@ -148,7 +151,7 @@ export function StructureMindMap({
         onWheel={(e) => {
           e.preventDefault();
           const dir = e.deltaY > 0 ? -0.08 : 0.08;
-          setPan((p) => ({ ...p, k: Math.min(1.6, Math.max(0.45, +(p.k + dir).toFixed(2)) })) });
+          setPan((p) => ({ ...p, k: Math.min(1.6, Math.max(0.45, +(p.k + dir).toFixed(2))) }));
         }}
         onPointerDown={(e) => {
           if ((e.target as HTMLElement).closest("button")) return;
