@@ -20,6 +20,9 @@ export function Footer() {
           <Link href="/structure" className="underline decoration-ivory/30 underline-offset-4 hover:text-ivory">
             {t("navStructure", lang)}
           </Link>
+          <Link href="/contacts" className="underline decoration-ivory/30 underline-offset-4 hover:text-ivory">
+            {t("navContacts", lang)}
+          </Link>
           <a
             href="https://www.uni-sofia.bg"
             target="_blank"

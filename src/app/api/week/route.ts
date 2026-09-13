@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { mondayOf, offeringsForUser, slotDate, slotKindLabel } from "@/lib/academic";
 import { holidaysInRange } from "@/lib/holidays";
+import { facultyEventsInRange } from "@/content/calendar/fknf-2026-27";
 
 export const dynamic = "force-dynamic";
 
@@ -111,6 +112,20 @@ export async function GET(req: Request) {
         }
       }
     }
+  }
+
+
+  for (const ev of facultyEventsInRange(start, end)) {
+    events.push({
+      id: ev.id,
+      titleBg: ev.titleBg,
+      titleEn: ev.titleEn,
+      when: ev.when,
+      end: ev.end,
+      kind: ev.kind,
+      href: ev.href,
+      room: ev.room,
+    });
   }
 
   for (const h of holidaysInRange(start, end)) {

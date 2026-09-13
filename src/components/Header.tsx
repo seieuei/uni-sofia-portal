@@ -17,6 +17,7 @@ export function Header() {
   const publicLinks = [
     { href: "/", label: t("navHome", lang) },
     { href: "/admissions", label: t("navAdmissions", lang) },
+    { href: "/contacts", label: t("navContacts", lang) },
     { href: "/how-it-works", label: t("navHow", lang) },
     { href: "/disclaimer", label: t("navDisclaimer", lang) },
   ];
@@ -27,6 +28,7 @@ export function Header() {
     { href: "/admissions", label: t("navAdmissions", lang) },
     { href: "/faculties", label: t("navFaculties", lang) },
     { href: "/structure", label: t("navStructure", lang) },
+    { href: "/contacts", label: t("navContacts", lang) },
     { href: "/journey", label: t("navJourney", lang) },
     { href: "/how-it-works", label: t("navHow", lang) },
     { href: "/manifesto", label: t("navManifesto", lang) },

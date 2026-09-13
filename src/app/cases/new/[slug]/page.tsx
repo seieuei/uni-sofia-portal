@@ -1,10 +1,10 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useApp } from "@/components/Providers";
-import { DynamicForm } from "@/components/DynamicForm";
+import { DynamicForm, missingRequiredFields } from "@/components/DynamicForm";
 import { RouteTimeline } from "@/components/RouteTimeline";
 import type { CatalogField, RouteStepDef } from "@/lib/catalog";
 import { ACTIVITY_KEYS, LOAD_ACTIVITY_RATES } from "@/lib/rates";
@@ -48,6 +48,7 @@ export default function NewProcessPage() {
   const [forbidden, setForbidden] = useState(false);
   const [values, setValues] = useState<Record<string, unknown>>({});
   const [error, setError] = useState("");
+  const [invalidNames, setInvalidNames] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   const [period, setPeriod] = useState("Зимен семестър 2025/26");
@@ -84,6 +85,21 @@ export default function NewProcessPage() {
         }
       });
   }, [ready, user, router, slug]);
+
+  const filledCount = useMemo(() => {
+    if (!process) return 0;
+    return process.fields.filter((f) => {
+      if (!f.required) return false;
+      const v = values[f.name];
+      if (f.type === "checkbox") return Boolean(v);
+      return v != null && String(v).trim() !== "";
+    }).length;
+  }, [process, values]);
+
+  const requiredCount = useMemo(
+    () => (process ? process.fields.filter((f) => f.required && f.type !== "loadLines").length : 0),
+    [process]
+  );
 
   function updateLine(i: number, patch: Partial<Line>) {
     setLines((prev) => {
@@ -135,6 +151,26 @@ export default function NewProcessPage() {
   async function submitGeneric(draft: boolean) {
     setLoading(true);
     setError("");
+    setInvalidNames([]);
+    if (!draft && process) {
+      const missing = missingRequiredFields(process.fields, values);
+      if (process.catalogCode === "3.5") {
+        const anyGround = ["groundIllness", "groundChildbirth", "groundExams", "groundAbroad", "groundOther"].some(
+          (k) => Boolean(values[k])
+        );
+        if (!anyGround) missing.push("groundIllness");
+      }
+      if (missing.length) {
+        setInvalidNames(missing);
+        setError(
+          lang === "bg"
+            ? "Попълни задължителните полета (маркирани)."
+            : "Please fill the required fields (highlighted)."
+        );
+        setLoading(false);
+        return;
+      }
+    }
     try {
       const r = await fetch("/api/cases", {
         method: "POST",
@@ -171,21 +207,39 @@ export default function NewProcessPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
-      <Link href="/cases/new" className="text-sm text-burgundy hover:underline">
+      <Link href="/cases/new" className="text-sm font-medium text-burgundy hover:underline">
         ← {lang === "bg" ? "Каталог процеси" : "Process catalog"}
       </Link>
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        {process.catalogCode && (
-          <span className="rounded-md bg-burgundy/10 px-2 py-0.5 font-mono text-xs font-bold text-burgundy">
-            {process.catalogCode}
-          </span>
+
+      <header className="paper-card mt-4 overflow-hidden">
+        <div className="bg-burgundy px-5 py-6 text-ivory sm:px-6">
+          <div className="flex flex-wrap items-center gap-2">
+            {process.catalogCode && (
+              <span className="rounded-md bg-ivory/15 px-2 py-0.5 font-mono text-xs font-bold text-gold">
+                {process.catalogCode}
+              </span>
+            )}
+            {process.nomenclatura && <span className="text-xs text-ivory/60">{process.nomenclatura}</span>}
+          </div>
+          <h1 className="mt-2 font-display text-2xl font-bold sm:text-3xl">{title}</h1>
+          <p className="mt-2 max-w-2xl text-sm text-ivory/75">
+            {lang === "bg" ? process.descriptionBg : process.descriptionEn}
+          </p>
+        </div>
+        {process.wizardKind !== "load-5-2" && requiredCount > 0 && (
+          <div className="flex items-center justify-between gap-3 border-t border-ink/5 bg-cream/40 px-5 py-2.5 text-xs text-ink/55 dark:bg-night/40">
+            <span>
+              {lang === "bg" ? "Задължителни полета" : "Required fields"}: {filledCount}/{requiredCount}
+            </span>
+            <div className="h-1.5 w-28 overflow-hidden rounded-full bg-ink/10">
+              <div
+                className="h-full rounded-full bg-burgundy transition-all dark:bg-gold"
+                style={{ width: `${requiredCount ? Math.min(100, (filledCount / requiredCount) * 100) : 0}%` }}
+              />
+            </div>
+          </div>
         )}
-        {process.nomenclatura && (
-          <span className="text-xs text-ink/45">{process.nomenclatura}</span>
-        )}
-      </div>
-      <h1 className="mt-2 font-display text-3xl font-bold">{title}</h1>
-      <p className="mt-2 text-sm text-ink/60">{lang === "bg" ? process.descriptionBg : process.descriptionEn}</p>
+      </header>
 
       {process.route.length > 0 && (
         <section className="paper-card mt-6 p-5">
@@ -228,13 +282,13 @@ export default function NewProcessPage() {
           <div>
             <div className="mb-2 flex items-center justify-between">
               <label className="label mb-0">{lang === "bg" ? "Преподаватели / дейности" : "Lecturers / activities"}</label>
-              <button type="button" className="text-xs font-medium text-burgundy" onClick={() => setLines((prev) => [...prev, emptyLine()])}>
+              <button type="button" className="text-xs font-semibold text-burgundy" onClick={() => setLines((prev) => [...prev, emptyLine()])}>
                 + {lang === "bg" ? "ред" : "row"}
               </button>
             </div>
             <div className="space-y-3">
               {lines.map((line, i) => (
-                <div key={i} className="rounded-xl border border-ink/10 bg-cream/40 p-3">
+                <div key={i} className="rounded-xl border border-ink/10 bg-cream/40 p-3 dark:bg-night/40">
                   <div className="grid gap-2 sm:grid-cols-2">
                     <input className="field" placeholder={lang === "bg" ? "Име" : "Name"} value={line.lecturerName} onChange={(e) => updateLine(i, { lecturerName: e.target.value })} required />
                     <input className="field" placeholder="email" type="email" value={line.lecturerEmail} onChange={(e) => updateLine(i, { lecturerEmail: e.target.value })} />
@@ -254,9 +308,9 @@ export default function NewProcessPage() {
               ))}
             </div>
           </div>
-          {error && <p className="text-sm text-burgundy">{error}</p>}
-          <div className="flex flex-wrap gap-3">
-            <button type="submit" className="btn-primary" disabled={loading}>
+          {error && <p className="rounded-xl border border-cal-deadline/30 bg-cal-deadline/10 px-3 py-2 text-sm text-cal-deadline">{error}</p>}
+          <div className="flex flex-wrap gap-3 border-t border-ink/10 pt-4">
+            <button type="submit" className="btn-primary min-w-[10rem]" disabled={loading}>
               {loading ? "…" : lang === "bg" ? "Изпрати към преподавател" : "Send to lecturer"}
             </button>
             <button type="button" className="btn-secondary" disabled={loading} onClick={() => submitLoad(false)}>
@@ -276,11 +330,15 @@ export default function NewProcessPage() {
             fields={process.fields}
             values={values}
             lang={lang}
-            onChange={(name, value) => setValues((prev) => ({ ...prev, [name]: value }))}
+            invalidNames={invalidNames}
+            onChange={(name, value) => {
+              setValues((prev) => ({ ...prev, [name]: value }));
+              setInvalidNames((prev) => prev.filter((n) => n !== name));
+            }}
           />
-          {error && <p className="text-sm text-burgundy">{error}</p>}
-          <div className="flex flex-wrap gap-3">
-            <button type="submit" className="btn-primary" disabled={loading}>
+          {error && <p className="rounded-xl border border-cal-deadline/30 bg-cal-deadline/10 px-3 py-2 text-sm text-cal-deadline">{error}</p>}
+          <div className="flex flex-wrap items-center gap-3 border-t border-ink/10 pt-4">
+            <button type="submit" className="btn-primary min-w-[10rem]" disabled={loading}>
               {loading ? "…" : lang === "bg" ? "Подай преписка" : "Submit case"}
             </button>
             <button type="button" className="btn-secondary" disabled={loading} onClick={() => submitGeneric(true)}>
