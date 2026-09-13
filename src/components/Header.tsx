@@ -4,18 +4,30 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useApp } from "./Providers";
 import { ThemeToggle } from "./ThemeToggle";
+import { Logo } from "./Logo";
 import { t } from "@/lib/i18n";
 import { academicNav } from "@/lib/academicUi";
 import { ROLES } from "@/lib/types";
 
 export function Header() {
-  const { lang, setLang, user, logout, ready } = useApp();
+  const { lang, setLang, user, logout, ready, visitor } = useApp();
   const path = usePathname();
   const router = useRouter();
 
   const publicLinks = [
     { href: "/", label: t("navHome", lang) },
     { href: "/how-it-works", label: t("navHow", lang) },
+    { href: "/disclaimer", label: t("navDisclaimer", lang) },
+  ];
+
+  const visitorLinks = [
+    { href: "/", label: t("navHome", lang) },
+    { href: "/about", label: t("navAbout", lang) },
+    { href: "/faculties", label: t("navFaculties", lang) },
+    { href: "/structure", label: t("navStructure", lang) },
+    { href: "/journey", label: t("navJourney", lang) },
+    { href: "/how-it-works", label: t("navHow", lang) },
+    { href: "/manifesto", label: t("navManifesto", lang) },
     { href: "/disclaimer", label: t("navDisclaimer", lang) },
   ];
 
@@ -31,14 +43,18 @@ export function Header() {
         cases: t("navCases", lang),
         reports: t("navReports", lang),
         handbook: t("navHandbook", lang),
+        journey: t("navJourney", lang),
+        structure: t("navStructure", lang),
       })
     : [];
 
-  const links = user ? authLinks : publicLinks;
+  const links = user ? authLinks : visitor ? visitorLinks : publicLinks;
 
   const roleLabel = user
     ? ROLES.find((r) => r.id === user.role)?.[lang === "bg" ? "labelBg" : "labelEn"]
-    : null;
+    : visitor
+      ? t("visitorBadge", lang)
+      : null;
 
   async function onLogout() {
     await logout();
@@ -46,12 +62,10 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-ink/10 bg-cream/90 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-ink/10 bg-cream/90 backdrop-blur-md dark:border-gold/15">
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
         <Link href={user ? "/week" : "/"} className="group flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-burgundy text-sm font-bold text-ivory shadow-sm">
-            СУ*
-          </span>
+          <Logo lang={lang} />
           <div className="leading-tight">
             <div className="font-display text-base font-semibold text-ink group-hover:text-burgundy">
               {t("siteName", lang)}
@@ -79,7 +93,7 @@ export function Header() {
 
         <div className="flex items-center gap-2">
           {ready && roleLabel && (
-            <span className="hidden rounded-full border border-ink/10 bg-surface px-2.5 py-1 text-xs text-ink/70 sm:inline">
+            <span className="hidden rounded-full border border-ink/10 bg-surface px-2.5 py-1 text-xs text-ink/70 dark:border-gold/20 sm:inline">
               {roleLabel}
               {user?.facultyCode ? ` · ${user.facultyCode}` : ""}
             </span>
@@ -94,7 +108,7 @@ export function Header() {
             </Link>
           ) : null}
           <ThemeToggle />
-          <div className="flex overflow-hidden rounded-lg border border-ink/15 bg-surface text-xs font-medium">
+          <div className="flex overflow-hidden rounded-lg border border-ink/15 bg-surface text-xs font-medium dark:border-gold/20">
             <button
               type="button"
               onClick={() => setLang("bg")}

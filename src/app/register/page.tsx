@@ -10,7 +10,7 @@ import { ROLES } from "@/lib/types";
 type Faculty = { code: string; nameBg: string; nameEn: string };
 
 export default function RegisterPage() {
-  const { lang, refreshUser } = useApp();
+  const { lang, refreshUser, exitVisitor } = useApp();
   const router = useRouter();
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [form, setForm] = useState({
@@ -49,6 +49,7 @@ export default function RegisterPage() {
         setError(d.error || "Registration failed");
         return;
       }
+      exitVisitor();
       await refreshUser();
       router.push("/week");
     } catch {

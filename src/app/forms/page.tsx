@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useApp } from "@/components/Providers";
 import { t } from "@/lib/i18n";
 
@@ -18,15 +19,23 @@ type FormRow = {
 };
 
 export default function FormsCatalogPage() {
-  const { lang, persona } = useApp();
+  const { lang, persona, user, ready, visitor } = useApp();
+  const router = useRouter();
   const [forms, setForms] = useState<FormRow[]>([]);
 
   useEffect(() => {
+    if (!ready) return;
+    if (!user) {
+      router.replace(visitor ? "/about" : "/login");
+      return;
+    }
     const q = persona ? `?role=${persona.role}` : "";
     fetch(`/api/forms${q}`)
       .then((r) => r.json())
       .then((d) => setForms(d.forms || []));
-  }, [persona]);
+  }, [persona, ready, user, visitor, router]);
+
+  if (!ready || !user) return <div className="mx-auto max-w-6xl px-4 py-12">…</div>;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-12">

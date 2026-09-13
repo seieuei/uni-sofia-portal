@@ -19,9 +19,16 @@ export default function HowItWorksPage() {
           </li>
         ))}
       </ol>
+      <p className="callout mt-8 px-4 py-3 text-sm">{t("visitorOnlyInfo", lang)}</p>
       <div className="mt-8 flex flex-wrap gap-3">
         <Link href="/login" className="btn-primary">
           {t("ctaStart", lang)}
+        </Link>
+        <Link href="/about" className="btn-secondary">
+          {t("navAbout", lang)}
+        </Link>
+        <Link href="/journey" className="btn-secondary">
+          {t("navJourney", lang)}
         </Link>
         <Link href="/" className="btn-secondary">
           {t("navHome", lang)}

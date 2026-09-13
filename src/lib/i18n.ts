@@ -152,6 +152,69 @@ const dict = {
     bg: "* Пилот · не е официален СУ · допълва СУСИ/elearn/Архимед · без истински SSO",
     en: "* Pilot · not official SU · complements SUSI/elearn/Arhimed · no real SSO",
   },
+  enterAs: { bg: "Влез като", en: "Enter as" },
+  roleStudent: { bg: "Студент", en: "Student" },
+  roleStudentHint: {
+    bg: "Седмица, курсове, учебна пътека. Демо: student@…",
+    en: "Week, courses, study path. Demo: student@…",
+  },
+  roleAdmin: { bg: "Администратор", en: "Administrator" },
+  roleAdminHint: {
+    bg: "Програмна / централна администрация. Демо: program.admin@…",
+    en: "Programme / central admin. Demo: program.admin@…",
+  },
+  roleFacultyAdmin: { bg: "Факултетен администратор", en: "Faculty administrator" },
+  roleFacultyAdminHint: {
+    bg: "Деканат и факултетни процеси. Демо: faculty.admin@…",
+    en: "Dean’s office and faculty processes. Demo: faculty.admin@…",
+  },
+  roleLecturer: { bg: "Преподавател", en: "Lecturer" },
+  roleLecturerHint: {
+    bg: "Лекции, отчет, потвърждения. Демо: lecturer@…",
+    en: "Lectures, report, confirmations. Demo: lecturer@…",
+  },
+  roleVisitor: { bg: "Посетител", en: "Visitor" },
+  roleVisitorHint: {
+    bg: "Само информативни страници — структура, факултети, пътека.",
+    en: "Informative pages only — structure, faculties, journey.",
+  },
+  visitorBadge: { bg: "Посетител", en: "Visitor" },
+  visitorOnlyInfo: {
+    bg: "Посетителят вижда само публична информация. Преписки, форми и вътрешен стол изискват вход.",
+    en: "Visitors see public information only. Cases, forms and the internal desk require sign-in.",
+  },
+  navAbout: { bg: "За университета", en: "About" },
+  navFaculties: { bg: "Факултети", en: "Faculties" },
+  navStructure: { bg: "Структура", en: "Structure" },
+  navJourney: { bg: "Пътека", en: "Journey" },
+  aboutTitle: { bg: "За университета", en: "About the university" },
+  aboutLead: {
+    bg: "Софийският университет „Св. Климент Охридски“ е най-старото висше училище в България (1888). Тук е информативен преглед — не работен каталог.",
+    en: "Sofia University St. Kliment Ohridski is Bulgaria’s oldest university (1888). This is an informative overview — not a work catalog.",
+  },
+  facultiesTitle: { bg: "Факултети", en: "Faculties" },
+  facultiesLead: {
+    bg: "16 факултета. Пилотният факултет ФКНФ е подчертан.",
+    en: "16 faculties. The FCML pilot faculty is highlighted.",
+  },
+  structureTitle: { bg: "Университетска структура", en: "University structure" },
+  structureLead: {
+    bg: "Интерактивна карта: органи, администрации, факултети. ФКНФ се разгъва и подчертава.",
+    en: "Interactive map: bodies, administrations, faculties. FCML expands and highlights.",
+  },
+  journeyTitle: { bg: "Как се става студент", en: "Becoming a student" },
+  journeyLead: {
+    bg: "Кратка пътека: програма → кандидатстване → изпити → записване → семестър.",
+    en: "A short path: programme → apply → exams → enrol → semester.",
+  },
+  calendarLegend: { bg: "Легенда", en: "Legend" },
+  expandAll: { bg: "Разгъни ФКНФ", en: "Expand FCML" },
+  collapseAll: { bg: "Свий", en: "Collapse" },
+  zoomIn: { bg: "Приближи", en: "Zoom in" },
+  zoomOut: { bg: "Отдалечи", en: "Zoom out" },
+  yourFaculty: { bg: "Твоят факултет", en: "Your faculty" },
+  demoHint: { bg: "Демо акаунт", en: "Demo account" },
+  continueVisitor: { bg: "Продължи като посетител", en: "Continue as visitor" },
 } as const;
 
 export type DictKey = keyof typeof dict;

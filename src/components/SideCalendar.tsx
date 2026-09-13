@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useApp } from "./Providers";
 import type { CalendarEvent } from "@/lib/academicUi";
+import { CalendarLegend } from "./CalendarLegend";
+import { calendarDotClass, calendarTone, calendarToneClass } from "@/lib/calendar";
 
 type View = "week" | "month";
 
@@ -90,7 +92,7 @@ export function SideCalendar() {
         <h2 className="font-display text-sm font-semibold">
           {lang === "bg" ? "Календар" : "Calendar"}
         </h2>
-        <div className="flex overflow-hidden rounded-lg border border-ink/15 text-[11px] font-medium">
+        <div className="flex overflow-hidden rounded-lg border border-ink/15 text-[11px] font-medium dark:border-gold/20">
           <button
             type="button"
             onClick={() => setView("week")}
@@ -144,7 +146,11 @@ export function SideCalendar() {
               >
                 <div>{d.getDate()}</div>
                 {dayEvents.length > 0 && (
-                  <div className="mx-auto mt-0.5 h-1 w-1 rounded-full bg-burgundy" />
+                  <div className="mt-0.5 flex justify-center gap-0.5">
+                    {dayEvents.slice(0, 3).map((ev) => (
+                      <span key={ev.id} className={`h-1 w-1 rounded-full ${calendarDotClass(calendarTone(ev.kind))}`} />
+                    ))}
+                  </div>
                 )}
               </button>
             );
@@ -166,10 +172,13 @@ export function SideCalendar() {
                 ) : (
                   <ul className="mt-0.5 space-y-1">
                     {dayEvents.map((ev) => {
+                      const tone = calendarTone(ev.kind);
                       const inner = (
-                        <div className="rounded-lg bg-ink/5 px-2 py-1">
-                          <div className="text-[10px] text-ink/45">
-                            {new Date(ev.when).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}
+                        <div className={`rounded-lg border px-2 py-1 ${calendarToneClass(tone)}`}>
+                          <div className="text-[10px] opacity-80">
+                            {tone === "holiday"
+                              ? ""
+                              : new Date(ev.when).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" })}
                             {ev.room ? ` · ${ev.room}` : ""}
                           </div>
                           <div className="text-[12px] leading-snug">{lang === "bg" ? ev.titleBg : ev.titleEn}</div>
@@ -195,6 +204,9 @@ export function SideCalendar() {
         </ul>
       )}
 
+      <div className="mt-3">
+        <CalendarLegend lang={lang} compact />
+      </div>
       <Link href="/week" className="mt-3 block text-center text-[11px] text-burgundy hover:underline">
         {lang === "bg" ? "Цялата седмица →" : "Full week →"}
       </Link>

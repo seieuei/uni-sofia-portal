@@ -118,17 +118,19 @@ export function academicNav(role: Role, labels: Record<string, string>) {
   const cases = { href: "/cases", label: labels.cases };
   const reports = { href: "/reports", label: labels.reports };
   const handbook = { href: "/handbook", label: labels.handbook };
+  const journey = { href: "/journey", label: labels.journey };
+  const structure = { href: "/structure", label: labels.structure };
 
   if (role === "student") {
-    return [week, inbox, courses, electives, curriculum, cases];
+    return [week, inbox, courses, electives, curriculum, cases, journey, structure];
   }
   if (role === "lecturer") {
-    return [week, inbox, courses, curriculum, report, cases];
+    return [week, inbox, courses, curriculum, report, cases, structure];
   }
   if (role === "applicant") {
-    return [week, inbox, newCase, cases];
+    return [week, inbox, newCase, cases, journey, structure];
   }
-  return [week, inbox, newCase, cases, curriculum, reports, handbook];
+  return [week, inbox, newCase, cases, curriculum, reports, handbook, structure];
 }
 
 export const APP_CALENDAR_PREFIXES = [
@@ -143,4 +145,6 @@ export const APP_CALENDAR_PREFIXES = [
   "/reports",
   "/forms",
   "/onboarding",
+  "/journey",
+  "/structure",
 ];

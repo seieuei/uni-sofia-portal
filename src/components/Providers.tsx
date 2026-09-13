@@ -13,6 +13,7 @@ import {
   systemTheme,
   type ResolvedTheme,
 } from "@/lib/theme";
+import { persistVisitor, readVisitorCookie } from "@/lib/visitor";
 
 type Ctx = {
   lang: Lang;
@@ -27,6 +28,9 @@ type Ctx = {
   refreshUser: () => Promise<void>;
   logout: () => Promise<void>;
   ready: boolean;
+  visitor: boolean;
+  enterVisitor: () => void;
+  exitVisitor: () => void;
 };
 
 const AppCtx = createContext<Ctx | null>(null);
@@ -45,6 +49,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [persona, setPersonaState] = useState<Persona | null>(null);
   const [ready, setReady] = useState(false);
+  const [visitor, setVisitor] = useState(false);
 
   const refreshUser = useCallback(async () => {
     try {
@@ -72,6 +77,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setThemeState(readResolvedTheme());
     const legacy = readPersona();
     setPersonaState(legacy);
+    setVisitor(readVisitorCookie());
     refreshUser().finally(() => setReady(true));
   }, [refreshUser]);
 
@@ -113,6 +119,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
     setPersonaState(null);
   }, []);
 
+  const enterVisitor = useCallback(() => {
+    persistVisitor(true);
+    setVisitor(true);
+  }, []);
+
+  const exitVisitor = useCallback(() => {
+    persistVisitor(false);
+    setVisitor(false);
+  }, []);
+
   const logout = useCallback(async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     clearPersona();
@@ -141,8 +157,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
       refreshUser,
       logout,
       ready,
+      visitor: !user && visitor,
+      enterVisitor,
+      exitVisitor,
     }),
-    [lang, setLang, theme, setTheme, toggleTheme, user, persona, setPersona, resetPersona, refreshUser, logout, ready]
+    [lang, setLang, theme, setTheme, toggleTheme, user, persona, setPersona, resetPersona, refreshUser, logout, ready, visitor, enterVisitor, exitVisitor]
   );
 
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>;
