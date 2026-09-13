@@ -1,10 +1,19 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useApp } from "@/components/Providers";
 import { t } from "@/lib/i18n";
+
+const ROLE_EMAIL: Record<string, string> = {
+  student: "student@demo.uni-sofia.local",
+  lecturer: "lecturer@demo.uni-sofia.local",
+  program_admin: "program.admin@demo.uni-sofia.local",
+  faculty_admin: "faculty.admin@demo.uni-sofia.local",
+  admin_staff: "program.admin@demo.uni-sofia.local",
+  assistant: "assistant@demo.uni-sofia.local",
+};
 
 const DEMOS = [
   "program.admin@demo.uni-sofia.local",
@@ -14,13 +23,27 @@ const DEMOS = [
   "student@demo.uni-sofia.local",
 ];
 
-export default function LoginPage() {
-  const { lang, refreshUser } = useApp();
+function LoginForm() {
+  const { lang, refreshUser, exitVisitor } = useApp();
   const router = useRouter();
+  const params = useSearchParams();
   const [email, setEmail] = useState(DEMOS[0]);
   const [password, setPassword] = useState("demo1234");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [hint, setHint] = useState("");
+
+  useEffect(() => {
+    const role = params.get("role") || "";
+    const emailParam = params.get("email") || "";
+    if (emailParam) {
+      setEmail(emailParam);
+      setHint(emailParam);
+    } else if (role && ROLE_EMAIL[role]) {
+      setEmail(ROLE_EMAIL[role]);
+      setHint(ROLE_EMAIL[role]);
+    }
+  }, [params]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -37,6 +60,7 @@ export default function LoginPage() {
         setError(d.error || "Login failed");
         return;
       }
+      exitVisitor();
       await refreshUser();
       router.push("/week");
     } catch {
@@ -50,10 +74,13 @@ export default function LoginPage() {
     <div className="mx-auto max-w-md px-4 py-16">
       <h1 className="font-display text-3xl font-bold">{t("loginTitle", lang)}</h1>
       <p className="mt-2 text-sm text-ink/60">
-        {lang === "bg"
-          ? "Демо вход. Не е официален СУ акаунт."
-          : "Demo sign-in. Not an official SU account."}
+        {lang === "bg" ? "Демо вход. Не е официален СУ акаунт." : "Demo sign-in. Not an official SU account."}
       </p>
+      {hint && (
+        <p className="callout mt-4 px-3 py-2 text-sm">
+          {t("demoHint", lang)}: <code className="font-mono text-xs">{hint}</code> · demo1234
+        </p>
+      )}
       <form onSubmit={onSubmit} className="paper-card mt-8 space-y-4 p-6">
         <div>
           <label className="label">{t("emailLabel", lang)}</label>
@@ -90,7 +117,20 @@ export default function LoginPage() {
             {t("navRegister", lang)} →
           </Link>
         </p>
+        <p className="mt-2">
+          <Link href="/about" className="text-ink/60 hover:underline">
+            {t("continueVisitor", lang)} →
+          </Link>
+        </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-md px-4 py-16 text-ink/50">…</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

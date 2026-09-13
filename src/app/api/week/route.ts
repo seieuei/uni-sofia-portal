@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { mondayOf, offeringsForUser, slotDate, slotKindLabel } from "@/lib/academic";
+import { holidaysInRange } from "@/lib/holidays";
 
 export const dynamic = "force-dynamic";
 
@@ -110,6 +111,16 @@ export async function GET(req: Request) {
         }
       }
     }
+  }
+
+  for (const h of holidaysInRange(start, end)) {
+    events.push({
+      id: `holiday-${h.date}`,
+      titleBg: h.titleBg,
+      titleEn: h.titleEn,
+      when: `${h.date}T00:00:00.000Z`,
+      kind: "holiday",
+    });
   }
 
   events.sort((a, b) => a.when.localeCompare(b.when));
