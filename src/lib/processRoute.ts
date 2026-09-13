@@ -127,7 +127,16 @@ export function copyPackFor(p: RouteableProcess): string[] {
     return [R.faculty, R.lsto];
   }
 
-  if (isCode(code, "3.3", "3.5", "3.4")) {
+  if (isCode(code, "3.3", "3.5")) {
+    return [R.od, R.facultyStudents];
+  }
+
+  if (code === "3.4") {
+    // Finish education / remaining exams — Dean track
+    return [R.facultyStudents, R.faculty];
+  }
+
+  if (code === "3.1") {
     return [R.od, R.facultyStudents];
   }
 
@@ -259,6 +268,29 @@ export function routeFor(p: RouteableProcess): RouteStepDef[] {
       step("dean", "Декан", "Dean"),
       step("registry", "Деловодство", "Registry"),
       step("pfc", "Предварителен финансов контрол", "Ex-ante financial control (PFC)"),
+      step("rector", "Ректор / упълномощен зам.-ректор", "Rector / empowered vice-rector"),
+      ...postSignSteps(p),
+    ];
+  }
+
+  // Finish education / remaining exams — stops at Dean (no Rector).
+  if (p.catalogCode === "3.4") {
+    return [
+      step("initiator", "Инициатор / изготвяне", "Initiator / draft"),
+      step("registry", "Деловодство (завеждане)", "Registry (intake)"),
+      step("domain", "Инспектор Студенти", "Student inspector"),
+      step("dean", "Декан — решение", "Dean — decision"),
+      ...postSignSteps(p),
+    ];
+  }
+
+  // Interrupt + restore: Dean opinion then Rector.
+  if (isCode(p.catalogCode, "3.3", "3.5")) {
+    return [
+      step("initiator", "Инициатор / изготвяне", "Initiator / draft"),
+      step("registry", "Деловодство (завеждане)", "Registry (intake)"),
+      step("domain", "Инспектор Студенти / Образователни дейности", "Student inspector / Education dept."),
+      step("dean", "Декан — мнение", "Dean opinion"),
       step("rector", "Ректор / упълномощен зам.-ректор", "Rector / empowered vice-rector"),
       ...postSignSteps(p),
     ];

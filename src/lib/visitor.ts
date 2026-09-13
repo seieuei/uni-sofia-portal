@@ -8,6 +8,7 @@ export const VISITOR_ALLOWED_PREFIXES = [
   "/admissions",
   "/programs",
   "/structure",
+  "/contacts",
   "/journey",
   "/how-it-works",
   "/manifesto",

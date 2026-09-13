@@ -216,6 +216,12 @@ const dict = {
   demoHint: { bg: "Демо акаунт", en: "Demo account" },
   continueVisitor: { bg: "Продължи като посетител", en: "Continue as visitor" },
   navAdmissions: { bg: "Кандидатстване", en: "Admissions" },
+  navContacts: { bg: "Контакти", en: "Contacts" },
+  contactsTitle: { bg: "Контакти", en: "Contacts" },
+  contactsLead: {
+    bg: "Централна администрация и ФКНФ деканат / зам.-декани — стаи, телефони, имейли и приемно време.",
+    en: "Central administration and FCML dean / vice-deans — rooms, phones, emails and office hours.",
+  },
   admissionsToc: { bg: "Съдържание", en: "Contents" },
   admissionsSearch: { bg: "Търси специалност", en: "Search a programme" },
   facultyChips: { bg: "Факултети", en: "Faculties" },

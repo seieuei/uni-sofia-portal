@@ -29,6 +29,12 @@ export type CatalogField = {
   type: FieldType;
   required?: boolean;
   options?: { value: string; labelBg: string; labelEn: string }[];
+  /** Group fields into paper sections in DynamicForm. */
+  section?: string;
+  sectionBg?: string;
+  sectionEn?: string;
+  hintBg?: string;
+  hintEn?: string;
 };
 
 export type { RoutePhase, RouteStepDef } from "./processRoute";
@@ -79,8 +85,8 @@ export const CATALOG: CatalogProcess[] = [
     wizardKind: "dynamic",
     titleBg: "Заявление за дубликат на диплома",
     titleEn: "Diploma duplicate request",
-    descriptionBg: "Официална бланка от Drive (student documents). Каталожен код: 3.1. Официалният шаблон не се променя — порталът попълва данните.",
-    descriptionEn: "Official Drive blank (student documents). Catalog code: 3.1. Template stays unchanged; the portal fills the data.",
+    descriptionBg: "Дубликат на диплома за завършено висше образование — към Ректора, със съгласуване ОД. Каталожен код: 3.1.",
+    descriptionEn: "Diploma duplicate for completed higher education — to the Rector, with Education dept. clearance. Catalog code: 3.1.",
     rolesAllowed: "student",
     driveFileId: "1Bg_blmQcMecHjJ_Boi5u-7IeGW2A3IWA",
     sourceFolder: "student documents",
@@ -107,7 +113,7 @@ export const CATALOG: CatalogProcess[] = [
     sourceFolder: "student documents",
     originalTitle: "Obrazec-3.2-Zayavlenie obuchenie nova-2018.doc",
     mimeType: "application/msword",
-    templateRel: "templates/official/student-documents/p-3-2.doc",
+    templateRel: "templates/official/student-documents/p-3-2.docx",
     nomenclatura: "УД-12",
     size: 46080,
     hasPayment: false,
@@ -170,7 +176,7 @@ export const CATALOG: CatalogProcess[] = [
     sourceFolder: "student documents",
     originalTitle: "Obrazec-3.3-Zayavlenie vastanoviavane studentski prava.doc",
     mimeType: "application/msword",
-    templateRel: "templates/official/student-documents/p-3-3.doc",
+    templateRel: "templates/official/student-documents/p-3-3.docx",
     nomenclatura: "УД-12",
     size: 41472,
     hasPayment: false,
@@ -182,16 +188,16 @@ export const CATALOG: CatalogProcess[] = [
     hub: "training",
     family: "petition",
     wizardKind: "dynamic",
-    titleBg: "Възстановяване на студентски права (факултет)",
-    titleEn: "Restore student rights (faculty only)",
-    descriptionBg: "Официална бланка от Drive (student documents). Каталожен код: 3.4. Официалният шаблон не се променя — порталът попълва данните.",
-    descriptionEn: "Official Drive blank (student documents). Catalog code: 3.4. Template stays unchanged; the portal fills the data.",
+    titleBg: "Завършване / оставащи изпити (до Декана)",
+    titleEn: "Finish education / remaining exams (to Dean)",
+    descriptionBg: "Заявление до Декана за полагане на оставащи семестриални / държавни изпити или защита (чл. 163 и 170 ПУДСУ). Каталожен код: 3.4.",
+    descriptionEn: "Petition to the Dean to sit remaining semester / state exams or thesis defence (PUDSU arts. 163 & 170). Catalog code: 3.4.",
     rolesAllowed: "student",
     driveFileId: "1hEsPegOOlw__jtkQctaQPkRfv888832I",
     sourceFolder: "student documents",
     originalTitle: "Obrazec-3.4-Zayavlenie vastanoviavane studenti.doc",
     mimeType: "application/msword",
-    templateRel: "templates/official/student-documents/p-3-4.doc",
+    templateRel: "templates/official/student-documents/p-3-4.docx",
     nomenclatura: "УД-12",
     size: 41984,
     hasPayment: false,
@@ -205,8 +211,8 @@ export const CATALOG: CatalogProcess[] = [
     wizardKind: "dynamic",
     titleBg: "Прекъсване на студентски права",
     titleEn: "Interrupt studies",
-    descriptionBg: "Официална бланка от Drive (student documents). Каталожен код: 3.5. Официалният шаблон не се променя — порталът попълва данните.",
-    descriptionEn: "Official Drive blank (student documents). Catalog code: 3.5. Template stays unchanged; the portal fills the data.",
+    descriptionBg: "Прекъсване по чл. 165 ПУД — чеклист с основания, мнение на Декана, решение на Ректора. Каталожен код: 3.5.",
+    descriptionEn: "Interrupt under PUD art. 165 — grounds checklist, Dean opinion, Rector decision. Catalog code: 3.5.",
     rolesAllowed: "student",
     driveFileId: "1rR7pV9sreAFON65K0eUtjTLpeVbZ5kLl",
     sourceFolder: "student documents",
@@ -266,10 +272,10 @@ export const CATALOG: CatalogProcess[] = [
     hub: "training",
     family: "petition",
     wizardKind: "dynamic",
-    titleBg: "Application form — чуждестранни студенти",
-    titleEn: "Application form — international students",
-    descriptionBg: "Официална бланка от Drive (student documents). Каталожен код: 3.8. Официалният шаблон не се променя — порталът попълва данните.",
-    descriptionEn: "Official Drive blank (student documents). Catalog code: 3.8. Template stays unchanged; the portal fills the data.",
+    titleBg: "Application form — BA/MA (EN/BG)",
+    titleEn: "Application form — BA/MA (EN/BG)",
+    descriptionBg: "Двуезична бланка за кандидатстване за ОКС „Бакалавър“ и „Магистър“. Каталожен код: 3.8.",
+    descriptionEn: "Bilingual application blank for BA and MA studies. Catalog code: 3.8.",
     rolesAllowed: "applicant,student,faculty_admin",
     driveFileId: "1LNUio4Wavl8HG2iSwK0umYzwSeoOdZb5",
     sourceFolder: "student documents",
@@ -2071,6 +2077,45 @@ export const HANDBOOK: HandbookItem[] = [
     mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     size: 110745,
   },
+  {
+    slug: "student-enrolment-fees",
+    kind: "student",
+    titleBg: "Записване и такси 2026/27",
+    titleEn: "Enrolment and fees 2026/27",
+    summaryBg: "Новоприети и горен курс; годишни такси; СУСИ/ePay и банков превод IBAN BG52BNBG96613100174301.",
+    summaryEn: "New and upper-year enrolment; annual fees; SUSI/ePay and bank transfer IBAN BG52BNBG96613100174301.",
+    driveFileId: "local-students2",
+    sourceFolder: "students",
+    originalTitle: "students2.pdf",
+    mimeType: "application/pdf",
+    size: 216725,
+  },
+  {
+    slug: "fknf-calendar-2026-27",
+    kind: "calendar",
+    titleBg: "Академичен календар ФКНФ 2026/27",
+    titleEn: "FCML academic calendar 2026/27",
+    summaryBg: "Откриване 1 окт. 2026, защити, държавни изпити, прием магистри.",
+    summaryEn: "1 Oct 2026 opening, defences, state exams, MA intake.",
+    driveFileId: "local-fknf-calendar",
+    sourceFolder: "calendar",
+    originalTitle: "fknf-academic-calendar-2026-27.pdf",
+    mimeType: "application/pdf",
+    size: 57023,
+  },
+  {
+    slug: "central-admin-contacts",
+    kind: "contacts",
+    titleBg: "Централна администрация — контакти",
+    titleEn: "Central administration — contacts",
+    summaryBg: "Главен мениджър, секретар, финансист, счетоводител, юрисконсулт, ОД, докторанти и др.",
+    summaryEn: "Chief manager, secretary, finance, accountant, legal, Education dept., doctoral office, and more.",
+    driveFileId: "local-central-admin",
+    sourceFolder: "structure",
+    originalTitle: "central-admin.pdf",
+    mimeType: "application/pdf",
+    size: 57292,
+  },
 ];
 
 
@@ -2084,10 +2129,10 @@ const f = (
 ): CatalogField => ({ name, labelBg, labelEn, type, required, options });
 
 const COMMON_PERSON: CatalogField[] = [
-  f("fullName", "Име и фамилия", "Full name"),
-  f("egn", "ЕГН / ЛНЧ", "Personal ID", "text", false),
-  f("faculty", "Факултет", "Faculty"),
-  f("department", "Катедра / програма", "Department / programme"),
+  { ...f("fullName", "Име и фамилия", "Full name"), section: "person", sectionBg: "Студент", sectionEn: "Student" },
+  { ...f("egn", "ЕГН / ЛНЧ", "Personal ID", "text", false), section: "person", sectionBg: "Студент", sectionEn: "Student" },
+  { ...f("faculty", "Факултет", "Faculty"), section: "person", sectionBg: "Студент", sectionEn: "Student" },
+  { ...f("department", "Катедра / програма", "Department / programme"), section: "person", sectionBg: "Студент", sectionEn: "Student" },
 ];
 
 const DATES: CatalogField[] = [
@@ -2102,30 +2147,114 @@ const FUNDING = f("fundingSource", "Източник на средства", "So
 const PERIOD = f("period", "Период", "Period");
 const SUBJECT = f("subject", "Относно", "Subject");
 
+const withSection = (
+  field: CatalogField,
+  section: string,
+  sectionBg: string,
+  sectionEn: string,
+  hint?: { bg?: string; en?: string }
+): CatalogField => ({
+  ...field,
+  section,
+  sectionBg,
+  sectionEn,
+  hintBg: hint?.bg,
+  hintEn: hint?.en,
+});
+
 export function fieldsFor(p: CatalogProcess): CatalogField[] {
   const extra: CatalogField[] = [];
   switch (p.family) {
-    case "petition":
+    case "petition": {
+      const person = "person";
+      const study = "study";
+      const request = "request";
       extra.push(
-        f("studentId", "Факултетен номер", "Student ID"),
-        f("year", "Курс / година", "Year of study", "text", false),
-        f("specialty", "Специалност", "Specialty"),
-        ...DATES.map((x) => ({ ...x, required: false })),
-        GROUNDS
+        withSection(f("studentId", "Факултетен номер", "Student ID"), person, "Студент", "Student"),
+        withSection(f("year", "Курс / година", "Year of study", "text", false), person, "Студент", "Student"),
+        withSection(f("specialty", "Специалност", "Specialty"), study, "Обучение", "Studies"),
+        withSection(f("studyForm", "Форма на обучение", "Form of study", "select", false, [
+          { value: "full", labelBg: "Редовна", labelEn: "Full-time" },
+          { value: "part", labelBg: "Задочна", labelEn: "Part-time" },
+          { value: "dist", labelBg: "Дистанционна", labelEn: "Distance" },
+        ]), study, "Обучение", "Studies"),
+        withSection(f("degree", "ОКС", "Degree", "select", false, [
+          { value: "ba", labelBg: "Бакалавър", labelEn: "Bachelor" },
+          { value: "ma", labelBg: "Магистър", labelEn: "Master" },
+        ]), study, "Обучение", "Studies"),
+        ...DATES.map((x) => withSection({ ...x, required: false }, request, "Искане", "Request")),
+        withSection(GROUNDS, request, "Искане", "Request"),
+        withSection(f("attachments", "Приложения", "Attachments", "textarea", false), request, "Искане", "Request")
       );
-      if (p.catalogCode === "3.7" || p.hasPayment) extra.push(IBAN, AMOUNT, FUNDING);
-      if (p.catalogCode === "3.5") {
+      if (p.catalogCode === "3.7" || p.hasPayment) {
         extra.push(
-          f("pudGround", "Основание по ПУД чл. 165", "PUD art. 165 ground", "select", true, [
-            { value: "illness", labelBg: "Заболяване", labelEn: "Illness" },
-            { value: "childbirth", labelBg: "Раждане / отглеждане", labelEn: "Childbirth / childcare" },
-            { value: "exams", labelBg: "Неположени изпити", labelEn: "Failed / pending exams" },
-            { value: "abroad", labelBg: "Частично обучение в чужбина", labelEn: "Partial study abroad" },
-            { value: "other", labelBg: "Друго", labelEn: "Other" },
-          ])
+          withSection(IBAN, "payment", "Плащане", "Payment"),
+          withSection(AMOUNT, "payment", "Плащане", "Payment"),
+          withSection(FUNDING, "payment", "Плащане", "Payment")
+        );
+      }
+      if (p.catalogCode === "3.5") {
+        const g = "grounds";
+        extra.push(
+          withSection(f("groundIllness", "Тежко заболяване", "Serious illness", "checkbox", false), g, "Основания по чл. 165", "Grounds (art. 165)"),
+          withSection(f("groundChildbirth", "Бременност / раждане / отглеждане до 3 г.", "Pregnancy / childbirth / childcare to age 3", "checkbox", false), g, "Основания по чл. 165", "Grounds (art. 165)"),
+          withSection(f("groundExams", "Неуспешно полагане на определен от ФС брой изпити", "Failed FS-set number of exams", "checkbox", false), g, "Основания по чл. 165", "Grounds (art. 165)"),
+          withSection(f("groundAbroad", "Частично обучение в чуждестранен университет", "Partial study at a foreign university", "checkbox", false), g, "Основания по чл. 165", "Grounds (art. 165)"),
+          withSection(f("groundOther", "Други важни причини", "Other important reasons", "checkbox", false), g, "Основания по чл. 165", "Grounds (art. 165)"),
+          withSection(f("period", "Учебна година на прекъсване (напр. 2026/2027)", "Interrupt academic year (e.g. 2026/2027)"), g, "Основания по чл. 165", "Grounds (art. 165)")
+        );
+      }
+      if (p.catalogCode === "3.4") {
+        const fin = "finish";
+        extra.push(
+          withSection(f("period", "Учебна година за завършване", "Academic year to finish"), fin, "Завършване", "Graduation"),
+          withSection(f("semesterFinished", "Семестриално завършил/а през", "Semester work finished in"), fin, "Завършване", "Graduation"),
+          withSection(f("finishKind", "Какво искам", "What I request", "select", true, [
+            { value: "remaining", labelBg: "Оставащи семестриални изпити", labelEn: "Remaining semester exams" },
+            { value: "state", labelBg: "Държавен изпит", labelEn: "State exam" },
+            { value: "thesis", labelBg: "Защита на дипломна работа", labelEn: "Thesis defence" },
+            { value: "both", labelBg: "Изпити и държавен / защита", labelEn: "Exams and state / thesis" },
+          ]), fin, "Завършване", "Graduation")
+        );
+      }
+      if (p.catalogCode === "3.1") {
+        const dip = "diploma";
+        extra.push(
+          withSection(f("diplomaNo", "№ на дипломата", "Diploma number", "text", false), dip, "Диплома", "Diploma"),
+          withSection(f("gradYear", "Година на завършване", "Graduation year"), dip, "Диплома", "Diploma"),
+          withSection(f("gradFaculty", "Завършил/а във факултет", "Graduated at faculty", "text", false), dip, "Диплома", "Diploma")
+        );
+      }
+      if (p.catalogCode === "3.3") {
+        extra.push(
+          withSection(f("period", "Възстановяване от учебна година", "Restore from academic year"), request, "Искане", "Request")
+        );
+      }
+      if (p.catalogCode === "3.8") {
+        const app = "application";
+        const edu = "education";
+        extra.push(
+          withSection(f("country", "Държава", "Country"), app, "Лични данни / Personal data", "Personal data"),
+          withSection(f("nationality", "Гражданство", "Nationality"), app, "Лични данни / Personal data", "Personal data"),
+          withSection(f("sex", "Пол", "Sex", "select", false, [
+            { value: "m", labelBg: "Мъж / Male", labelEn: "Male" },
+            { value: "f", labelBg: "Жена / Female", labelEn: "Female" },
+          ]), app, "Лични данни / Personal data", "Personal data"),
+          withSection(f("birthPlace", "Място на раждане", "Place of birth", "text", false), app, "Лични данни / Personal data", "Personal data"),
+          withSection(f("permanentAddress", "Постоянен адрес", "Permanent address", "textarea"), app, "Лични данни / Personal data", "Personal data"),
+          withSection(f("phone", "Телефон", "Phone", "text", false), app, "Лични данни / Personal data", "Personal data"),
+          withSection(f("email", "Електронна поща", "E-mail", "email"), app, "Лични данни / Personal data", "Personal data"),
+          withSection(f("secondarySchool", "Средно училище", "Secondary school", "text", false), edu, "Образование / Education", "Education"),
+          withSection(f("desiredSubject1", "Желана специалност (1)", "Desired subject (1)"), edu, "Обучение в СУ / Studies at SU", "Studies at SU"),
+          withSection(f("desiredSubject2", "Желана специалност (2)", "Desired subject (2)", "text", false), edu, "Обучение в СУ / Studies at SU", "Studies at SU"),
+          withSection(f("applyDegree", "Кандидатствам за", "Applying for", "select", true, [
+            { value: "ba", labelBg: "Бакалавър / BA", labelEn: "Bachelor / BA" },
+            { value: "ma", labelBg: "Магистър / MA", labelEn: "Master / MA" },
+          ]), edu, "Обучение в СУ / Studies at SU", "Studies at SU")
         );
       }
       break;
+    }
     case "leave":
       extra.push(
         f("position", "Длъжност", "Position", "text", false),

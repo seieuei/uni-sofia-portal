@@ -65,15 +65,34 @@ export default function HandbookPage() {
         </ul>
       </div>
 
+      <div className="mt-6 grid gap-3 sm:grid-cols-3">
+        <Link href="/handbook/student-enrolment-fees" className="paper-card p-4 text-sm hover:border-burgundy/30">
+          <div className="text-[10px] uppercase text-ink/40">student</div>
+          <div className="mt-1 font-semibold text-burgundy">{lang === "bg" ? "Записване и такси 2026/27" : "Enrolment & fees 2026/27"}</div>
+        </Link>
+        <Link href="/contacts" className="paper-card p-4 text-sm hover:border-burgundy/30">
+          <div className="text-[10px] uppercase text-ink/40">contacts</div>
+          <div className="mt-1 font-semibold text-burgundy">{lang === "bg" ? "Контакти" : "Contacts"}</div>
+        </Link>
+        <Link href="/handbook/fknf-calendar-2026-27" className="paper-card p-4 text-sm hover:border-burgundy/30">
+          <div className="text-[10px] uppercase text-ink/40">calendar</div>
+          <div className="mt-1 font-semibold text-burgundy">{lang === "bg" ? "Календар ФКНФ" : "FCML calendar"}</div>
+        </Link>
+      </div>
+
       <div className="mt-8 space-y-4">
         {entries.map((e) => (
           <article key={e.slug} className="paper-card p-5">
             <div className="text-[10px] uppercase tracking-wide text-ink/40">{e.kind}</div>
-            <h2 className="mt-1 font-display text-lg font-semibold">{lang === "bg" ? e.titleBg : e.titleEn}</h2>
+            <h2 className="mt-1 font-display text-lg font-semibold">
+              <Link href={`/handbook/${e.slug}`} className="hover:text-burgundy">
+                {lang === "bg" ? e.titleBg : e.titleEn}
+              </Link>
+            </h2>
             <p className="mt-2 text-sm text-ink/70">{lang === "bg" ? e.summaryBg : e.summaryEn}</p>
-            {e.driveFileId && (
-              <p className="mt-2 font-mono text-xs text-ink/40">Drive: {e.driveFileId}</p>
-            )}
+            <Link href={`/handbook/${e.slug}`} className="mt-3 inline-block text-sm font-medium text-burgundy hover:underline">
+              {lang === "bg" ? "Отвори →" : "Open →"}
+            </Link>
           </article>
         ))}
       </div>

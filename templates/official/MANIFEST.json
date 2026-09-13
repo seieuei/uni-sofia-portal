@@ -11,7 +11,7 @@
     "templateRel": "templates/official/student-documents/p-3-1.docx",
     "nomenclatura": "УД-12",
     "path": "templates/official/student-documents/p-3-1.docx",
-    "source": "structural"
+    "source": "from-drive"
   },
   {
     "slug": "p-3-2",
@@ -73,8 +73,8 @@
     "slug": "p-3-4",
     "catalogCode": "3.4",
     "hub": "training",
-    "titleBg": "Възстановяване на студентски права (факултет)",
-    "titleEn": "Restore student rights (faculty only)",
+    "titleBg": "Завършване / оставащи изпити (до Декана)",
+    "titleEn": "Finish education / remaining exams (to Dean)",
     "driveFileId": "1hEsPegOOlw__jtkQctaQPkRfv888832I",
     "sourceFolder": "student documents",
     "originalTitle": "Obrazec-3.4-Zayavlenie vastanoviavane studenti.doc",
@@ -95,7 +95,7 @@
     "templateRel": "templates/official/student-documents/p-3-5.docx",
     "nomenclatura": "УД-12",
     "path": "templates/official/student-documents/p-3-5.docx",
-    "source": "structural"
+    "source": "from-drive"
   },
   {
     "slug": "p-3-6",
@@ -137,7 +137,7 @@
     "templateRel": "templates/official/student-documents/p-3-8.docx",
     "nomenclatura": "УД-12",
     "path": "templates/official/student-documents/p-3-8.docx",
-    "source": "structural"
+    "source": "from-drive"
   },
   {
     "slug": "p-3-8c",

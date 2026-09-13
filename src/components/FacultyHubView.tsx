@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useApp } from "./Providers";
 import type { FacultyHub, HubSection } from "@/content/faculties/hubs";
 import { HUB_SECTION_ORDER } from "@/content/faculties/hubs";
+import { ContactCard } from "@/components/ContactCard";
+import { FCML_DEAN, FCML_VICE_DEANS } from "@/content/contacts/central";
 
 export function FacultyHubView({ hub, section }: { hub: FacultyHub; section?: HubSection }) {
   const { lang } = useApp();
@@ -142,6 +144,14 @@ export function FacultyHubView({ hub, section }: { hub: FacultyHub; section?: Hu
               {p}
             </p>
           ))}
+          {hub.slug === "fcml" && section.slug === "contacts" && (
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <ContactCard person={FCML_DEAN} lang={lang} highlight />
+              {FCML_VICE_DEANS.map((c) => (
+                <ContactCard key={c.roleBg} person={c} lang={lang} />
+              ))}
+            </div>
+          )}
           {section.links && section.links.length > 0 && (
             <ul className="mt-5 space-y-2">
               {section.links.map((l) => (
