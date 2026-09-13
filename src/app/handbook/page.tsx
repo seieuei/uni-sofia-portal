@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useApp } from "@/components/Providers";
 import { t } from "@/lib/i18n";
 
@@ -18,22 +17,18 @@ type Entry = {
 };
 
 export default function HandbookPage() {
-  const { lang, user, ready } = useApp();
-  const router = useRouter();
+  const { lang, ready } = useApp();
   const [entries, setEntries] = useState<Entry[]>([]);
 
   useEffect(() => {
     if (!ready) return;
-    if (!user) {
-      router.replace("/login");
-      return;
-    }
     fetch("/api/handbook")
       .then((r) => r.json())
-      .then((d) => setEntries(d.entries || []));
-  }, [ready, user, router]);
+      .then((d) => setEntries(d.entries || []))
+      .catch(() => setEntries([]));
+  }, [ready]);
 
-  if (!ready || !user) return <div className="mx-auto max-w-6xl px-4 py-12">…</div>;
+  if (!ready) return <div className="mx-auto max-w-6xl px-4 py-12">…</div>;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
@@ -51,16 +46,16 @@ export default function HandbookPage() {
               : "Roles only see processes they are allowed to start (default deny)."}
           </li>
           <li>
-            <Link href="/cases/new" className="text-burgundy underline">
-              /cases/new
+            <Link href="/map" className="text-burgundy underline">
+              /map
             </Link>{" "}
-            — {lang === "bg" ? "пълен каталог преписки." : "full process catalog."}
+            — {lang === "bg" ? "демо схема на Ректората (зали)." : "demo Rectorate room schematic."}
           </li>
           <li>
-            <Link href="/forms" className="text-burgundy underline">
-              /forms
+            <Link href="/contacts" className="text-burgundy underline">
+              /contacts
             </Link>{" "}
-            — {lang === "bg" ? "наследени демо форми." : "legacy demo forms."}
+            — {lang === "bg" ? "контакти централна администрация и ФКНФ." : "central admin and FCML contacts."}
           </li>
         </ul>
       </div>

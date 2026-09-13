@@ -37,6 +37,8 @@ function cardsFor(user: SessionUser, lang: Lang): { href: string; title: string;
     return [
       ...common,
       { href: "/electives", title: lang === "bg" ? "Избираеми" : "Electives", hint: lang === "bg" ? "Прозорец за избор" : "Choice window" },
+      { href: "/handbook", title: lang === "bg" ? "Справочник" : "Handbook", hint: lang === "bg" ? "Такси, календар, контакти" : "Fees, calendar, contacts" },
+      { href: "/map", title: lang === "bg" ? "Карта / зали" : "Map / rooms", hint: lang === "bg" ? "Ректорат — демо схема" : "Rectorate — demo schematic" },
       { href: "/journey", title: lang === "bg" ? "Пътека" : "Journey", hint: lang === "bg" ? "Как се става студент" : "Becoming a student" },
     ];
   }
@@ -62,6 +64,7 @@ function cardsFor(user: SessionUser, lang: Lang): { href: string; title: string;
   return [
     { href: "/cases/new", title: lang === "bg" ? "Нова преписка" : "New case", hint: lang === "bg" ? "Каталог процеси" : "Process catalogue" },
     { href: "/handbook", title: lang === "bg" ? "Справочник" : "Handbook", hint: lang === "bg" ? "Не-форми" : "Non-forms" },
+    { href: "/map", title: lang === "bg" ? "Карта / зали" : "Map / rooms", hint: lang === "bg" ? "Ректорат — демо схема" : "Rectorate — demo schematic" },
     { href: "/structure", title: lang === "bg" ? "Структура" : "Structure", hint: lang === "bg" ? "Интерактивна карта" : "Interactive map" },
   ];
 }

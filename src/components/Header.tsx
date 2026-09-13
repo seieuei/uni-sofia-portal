@@ -18,6 +18,8 @@ export function Header() {
     { href: "/", label: t("navHome", lang) },
     { href: "/admissions", label: t("navAdmissions", lang) },
     { href: "/contacts", label: t("navContacts", lang) },
+    { href: "/map", label: t("navMap", lang) },
+    { href: "/handbook", label: t("navHandbook", lang) },
     { href: "/how-it-works", label: t("navHow", lang) },
     { href: "/disclaimer", label: t("navDisclaimer", lang) },
   ];
@@ -29,6 +31,8 @@ export function Header() {
     { href: "/faculties", label: t("navFaculties", lang) },
     { href: "/structure", label: t("navStructure", lang) },
     { href: "/contacts", label: t("navContacts", lang) },
+    { href: "/map", label: t("navMap", lang) },
+    { href: "/handbook", label: t("navHandbook", lang) },
     { href: "/journey", label: t("navJourney", lang) },
     { href: "/how-it-works", label: t("navHow", lang) },
     { href: "/manifesto", label: t("navManifesto", lang) },
@@ -51,6 +55,8 @@ export function Header() {
         structure: t("navStructure", lang),
         admissions: t("navAdmissions", lang),
         faculties: t("navFaculties", lang),
+        map: t("navMap", lang),
+        contacts: t("navContacts", lang),
       })
     : [];
 

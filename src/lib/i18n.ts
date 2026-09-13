@@ -17,6 +17,7 @@ const dict = {
   navCases: { bg: "Моите дела", en: "My cases" },
   navReports: { bg: "Справки", en: "Reports" },
   navHandbook: { bg: "Справочник", en: "Handbook" },
+  navMap: { bg: "Карта / зали", en: "Map / rooms" },
   navCourses: { bg: "Курсове", en: "Courses" },
   navElectives: { bg: "Избираеми", en: "Electives" },
   navCurriculum: { bg: "Учебен план", en: "Curriculum" },
