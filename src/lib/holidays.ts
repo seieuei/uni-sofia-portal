@@ -53,7 +53,7 @@ export function holidaysForYear(year: number): Holiday[] {
 }
 
 export function holidaysInRange(start: Date, end: Date): Holiday[] {
-  const years = new Set<number>([start.getFullYear(), end.getFullYear()]);
+  const years = Array.from(new Set<number>([start.getFullYear(), end.getFullYear()]));
   const out: Holiday[] = [];
   for (const y of years) {
     for (const h of holidaysForYear(y)) {
