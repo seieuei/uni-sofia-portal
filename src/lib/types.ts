@@ -33,6 +33,9 @@ export type SessionUser = {
   facultyId: string | null;
   department: string | null;
   year: number | null;
+  studentCycle: string | null;
+  formOfStudy: string | null;
+  lecturerKind: string | null;
 };
 
 export const ROLES: { id: Role; labelBg: string; labelEn: string; emoji: string }[] = [

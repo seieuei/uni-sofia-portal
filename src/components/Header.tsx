@@ -16,6 +16,7 @@ export function Header() {
 
   const publicLinks = [
     { href: "/", label: t("navHome", lang) },
+    { href: "/admissions", label: t("navAdmissions", lang) },
     { href: "/how-it-works", label: t("navHow", lang) },
     { href: "/disclaimer", label: t("navDisclaimer", lang) },
   ];
@@ -23,6 +24,7 @@ export function Header() {
   const visitorLinks = [
     { href: "/", label: t("navHome", lang) },
     { href: "/about", label: t("navAbout", lang) },
+    { href: "/admissions", label: t("navAdmissions", lang) },
     { href: "/faculties", label: t("navFaculties", lang) },
     { href: "/structure", label: t("navStructure", lang) },
     { href: "/journey", label: t("navJourney", lang) },
@@ -45,6 +47,8 @@ export function Header() {
         handbook: t("navHandbook", lang),
         journey: t("navJourney", lang),
         structure: t("navStructure", lang),
+        admissions: t("navAdmissions", lang),
+        faculties: t("navFaculties", lang),
       })
     : [];
 
@@ -96,6 +100,23 @@ export function Header() {
             <span className="hidden rounded-full border border-ink/10 bg-surface px-2.5 py-1 text-xs text-ink/70 dark:border-gold/20 sm:inline">
               {roleLabel}
               {user?.facultyCode ? ` · ${user.facultyCode}` : ""}
+              {user?.role === "student" && user.formOfStudy === "part-time"
+                ? lang === "bg"
+                  ? " · задочна"
+                  : " · part-time"
+                : ""}
+              {user?.role === "student" && user.studentCycle && user.studentCycle !== "ba"
+                ? ` · ${user.studentCycle.toUpperCase()}`
+                : ""}
+              {user?.role === "lecturer" && user.lecturerKind
+                ? user.lecturerKind === "honorary"
+                  ? lang === "bg"
+                    ? " · хоноруван"
+                    : " · honorary"
+                  : lang === "bg"
+                    ? " · щатен"
+                    : " · staff"
+                : ""}
             </span>
           )}
           {ready && user ? (

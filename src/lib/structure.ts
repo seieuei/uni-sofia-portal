@@ -1,3 +1,13 @@
+export type StructureKind =
+  | "root"
+  | "branch"
+  | "faculty"
+  | "office"
+  | "commission"
+  | "person"
+  | "program-group"
+  | "program";
+
 export type StructureNode = {
   id: string;
   labelBg: string;
@@ -6,6 +16,11 @@ export type StructureNode = {
   hintEn?: string;
   highlight?: boolean;
   children?: StructureNode[];
+  kind?: StructureKind;
+  facultyCode?: string;
+  degree?: "BA" | "MA";
+  programSlug?: string;
+  href?: string;
 };
 
 /** Static organigram seeded from official SU / FCML pages (pilot snapshot). */
@@ -131,12 +146,70 @@ export const UNIVERSITY_STRUCTURE: StructureNode = {
       hintEn: "All 16 SU faculties. FCML is highlighted — the pilot faculty.",
       children: [
         { id: "HF", labelBg: "Исторически факултет", labelEn: "Faculty of History" },
-        { id: "FFIL", labelBg: "Философски факултет", labelEn: "Faculty of Philosophy" },
+        {
+          id: "FFIL",
+          labelBg: "Философски факултет",
+          labelEn: "Faculty of Philosophy",
+          kind: "faculty",
+          facultyCode: "FFIL",
+          href: "/faculties/phls",
+          hintBg: "Втори примерен хъб — по IA на phls.uni-sofia.bg.",
+          hintEn: "Second example hub — PHLS IA.",
+          children: [
+            {
+              id: "ffil-offices",
+              labelBg: "Деканат и служби",
+              labelEn: "Dean's office and services",
+              kind: "office",
+              children: [
+                { id: "ffil-dekanat", labelBg: "Деканат", labelEn: "Dean's office", kind: "office" },
+                { id: "ffil-students", labelBg: "Инспектори / студенти", labelEn: "Inspectors / students", kind: "office" },
+              ],
+            },
+            {
+              id: "ffil-deans",
+              labelBg: "Ръководство",
+              labelEn: "Leadership",
+              kind: "person",
+              children: [{ id: "ffil-dean", labelBg: "Декан", labelEn: "Dean", kind: "person" }],
+            },
+            {
+              id: "ffil-ba",
+              labelBg: "Бакалавърски програми",
+              labelEn: "Bachelor programmes",
+              kind: "program-group",
+              degree: "BA",
+              children: [
+                { id: "ba-phil", labelBg: "Философия", labelEn: "Philosophy", kind: "program", degree: "BA", href: "/admissions/specialties/filosofiya" },
+                { id: "ba-psy", labelBg: "Психология", labelEn: "Psychology", kind: "program", degree: "BA", href: "/admissions/specialties/psihologiya" },
+                { id: "ba-soc", labelBg: "Социология", labelEn: "Sociology", kind: "program", degree: "BA", href: "/admissions/specialties/sotsiologiya" },
+                { id: "ba-pol", labelBg: "Политология", labelEn: "Political Science", kind: "program", degree: "BA", href: "/admissions/specialties/politologiya" },
+                { id: "ba-pa", labelBg: "Публична администрация", labelEn: "Public Administration", kind: "program", degree: "BA", href: "/admissions/specialties/publicna-administratsiya" },
+                { id: "ba-kult", labelBg: "Културология", labelEn: "Cultural Studies", kind: "program", degree: "BA", href: "/admissions/specialties/kulturologiya" },
+                { id: "ba-eu", labelBg: "Европеистика", labelEn: "European Studies", kind: "program", degree: "BA", href: "/admissions/specialties/evropeistika" },
+                { id: "ba-lis", labelBg: "Библиотечно-информационни науки", labelEn: "Library and Information Sciences", kind: "program", degree: "BA", href: "/admissions/specialties/bibliotechni-nauki" },
+              ],
+            },
+            {
+              id: "ffil-ma",
+              labelBg: "Магистърски програми",
+              labelEn: "Master programmes",
+              kind: "program-group",
+              degree: "MA",
+              children: [
+                { id: "ma-phls", labelBg: "МП на ФФ (отделен прием)", labelEn: "PHLS MA (separate intake)", kind: "program", degree: "MA", href: "/admissions/masters" },
+              ],
+            },
+          ],
+        },
         {
           id: "FCML",
           labelBg: "Факултет по класически и нови филологии (ФКНФ)",
           labelEn: "Faculty of Classical and Modern Philology (FCML)",
           highlight: true,
+          kind: "faculty",
+          facultyCode: "FCML",
+          href: "/faculties/fcml",
           hintBg: "Пилотен факултет. Разгъни за деканат, комисии, ръководство и програми.",
           hintEn: "Pilot faculty. Expand for offices, commissions, leadership and programmes.",
           children: [
@@ -220,10 +293,21 @@ export const UNIVERSITY_STRUCTURE: StructureNode = {
               id: "fcml-ba",
               labelBg: "Бакалавърски програми",
               labelEn: "Bachelor programmes",
+              kind: "program-group",
+              degree: "BA",
               hintBg: "Списък по официалните специалности на ФКНФ (пилотна извадка).",
               hintEn: "FCML bachelor programmes (pilot snapshot).",
               children: [
-                { id: "ba-afr", labelBg: "Африканистика", labelEn: "African Studies", highlight: true },
+                {
+                  id: "ba-afr",
+                  labelBg: "Африканистика",
+                  labelEn: "African Studies",
+                  highlight: true,
+                  kind: "program",
+                  degree: "BA",
+                  programSlug: "african-studies-ba",
+                  href: "/programs/african-studies-ba",
+                },
                 { id: "ba-afr-en", labelBg: "Африканистика (на английски език)", labelEn: "African Studies (English-taught)" },
                 { id: "ba-eng", labelBg: "Англицистика", labelEn: "English Studies" },
                 { id: "ba-am", labelBg: "Американистика", labelEn: "American Studies" },
@@ -252,6 +336,8 @@ export const UNIVERSITY_STRUCTURE: StructureNode = {
               id: "fcml-ma",
               labelBg: "Магистърски програми",
               labelEn: "Master programmes",
+              kind: "program-group",
+              degree: "MA",
               hintBg: "Актуални МП на ФКНФ (пилотна извадка от официалния списък).",
               hintEn: "Current FCML MA programmes (pilot snapshot).",
               children: [

@@ -1,17 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import { academicPeriodOf } from "@/lib/academic";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const slug = req.nextUrl.searchParams.get("slug");
   const user = await getCurrentUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!slug && !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { academicYear } = academicPeriodOf();
   const program = await prisma.program.findUnique({
-    where: { slug: "african-studies-ba" },
+    where: { slug: slug || "african-studies-ba" },
     include: {
       faculty: true,
       versions: {

@@ -7,6 +7,8 @@ import { useApp } from "@/components/Providers";
 import { CalendarLegend } from "@/components/CalendarLegend";
 import { calendarTone, calendarToneClass, calendarToneLabel } from "@/lib/calendar";
 import { t } from "@/lib/i18n";
+import { RoleHomeCards } from "@/components/RoleHomeCards";
+import { PersonTypeBadge } from "@/components/PersonTypeBadge";
 
 type Ev = {
   id: string;
@@ -81,10 +83,19 @@ export default function WeekPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-bold">{t("weekTitle", lang)}</h1>
-          <p className="mt-1 text-ink/60">
-            {user.name}
-            {user.department ? ` · ${user.department}` : ""}
-            {user.year ? ` · ${lang === "bg" ? "курс" : "year"} ${user.year}` : ""}
+          <p className="mt-1 flex flex-wrap items-center gap-2 text-ink/60">
+            <span>
+              {user.name}
+              {user.department ? ` · ${user.department}` : ""}
+              {user.year ? ` · ${lang === "bg" ? "курс" : "year"} ${user.year}` : ""}
+            </span>
+            <PersonTypeBadge
+              role={user.role}
+              studentCycle={user.studentCycle}
+              formOfStudy={user.formOfStudy}
+              lecturerKind={user.lecturerKind}
+              lang={lang}
+            />
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -122,6 +133,8 @@ export default function WeekPage() {
           </Link>
         </div>
       </div>
+
+      <RoleHomeCards user={user} lang={lang} />
 
       <div className="mt-6">
         <CalendarLegend lang={lang} />

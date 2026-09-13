@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { spawnSync } from "child_process";
 import { seedProcesses } from "../prisma/seed-processes";
 import { seedAcademic } from "../prisma/seed-academic";
+import { seedPersonas } from "../prisma/seed-personas";
 
 const prisma = new PrismaClient();
 
@@ -38,6 +39,9 @@ async function main() {
   } else {
     console.log("Academic desk seed upserted.");
   }
+
+  console.log("→ sync person-type demo users (additive upsert)");
+  await seedPersonas(prisma);
 }
 
 main()

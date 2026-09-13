@@ -81,6 +81,9 @@ export default function LandingPage() {
                 <Link href="/how-it-works" className="btn-secondary">
                   {t("ctaHow", lang)}
                 </Link>
+                <Link href="/admissions" className="btn-secondary">
+                  {t("navAdmissions", lang)}
+                </Link>
                 <Link href="/structure" className="btn-secondary">
                   {t("navStructure", lang)}
                 </Link>
@@ -148,6 +151,24 @@ export default function LandingPage() {
                 </Link>
               );
             })}
+          </div>
+          <div className="mt-6 flex flex-wrap gap-2 text-xs">
+            {[
+              { href: "/login?role=student", label: t("subtypeBaFull", lang) },
+              { href: "/login?email=student.part@demo.uni-sofia.local", label: t("subtypeBaPart", lang) },
+              { href: "/login?email=student.ma@demo.uni-sofia.local", label: t("subtypeMa", lang) },
+              { href: "/login?email=student.phd@demo.uni-sofia.local", label: t("subtypePhd", lang) },
+              { href: "/login?email=lecturer.staff@demo.uni-sofia.local", label: t("subtypeStaff", lang) },
+              { href: "/login?role=lecturer", label: t("subtypeHonorary", lang) },
+            ].map((chip) => (
+              <Link
+                key={chip.href + chip.label}
+                href={chip.href}
+                className="rounded-full border border-ink/15 px-3 py-1 text-ink/70 hover:border-gold/50 hover:text-burgundy"
+              >
+                {chip.label}
+              </Link>
+            ))}
           </div>
         </div>
       </section>

@@ -35,11 +35,13 @@ export const STUDENT_JOURNEY: JourneyStep[] = [
     detailsBg: [
       "Следвай официалния график на приемната кампания на СУ.",
       "Подготви диплома за средно образование и езикови сертификати (ако се изискват).",
+      "Отвори навигатора „Кандидатстване“ за бал, класирания и каталог по факултет.",
       "Този портал не замества официалната система за прием.",
     ],
     detailsEn: [
       "Follow the official SU admissions calendar.",
       "Prepare a secondary-school diploma and language certificates if required.",
+      "Open the Admissions navigator for scores, rankings and the faculty catalogue.",
       "This portal does not replace the official admissions system.",
     ],
   },
