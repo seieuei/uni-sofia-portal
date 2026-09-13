@@ -78,10 +78,10 @@ export function StructureMindMap({
   }, [facultyCode]);
 
   const [expanded, setExpanded] = useState<IdSet>(
-    () => new Set(["university", "faculties", "FCML", "fcml-ba", "FFIL", ...highlightPath])
+    () => new Set(["university", "faculties", facultyCode === "FFIL" ? "FFIL" : "FCML", ...highlightPath])
   );
   const [selected, setSelected] = useState(facultyCode === "FFIL" ? "FFIL" : "FCML");
-  const [pan, setPan] = useState({ x: 40, y: 20, k: 0.85 });
+  const [pan, setPan] = useState({ x: 80, y: 40, k: 1 });
   const drag = useRef(null as DragState | null);
 
   const W = 1600;
@@ -122,7 +122,7 @@ export function StructureMindMap({
         <button type="button" className="btn-secondary !px-3 !py-1.5 text-xs" onClick={collapse}>
           {t("collapseAll", lang)}
         </button>
-        <button type="button" className="btn-secondary !px-3 !py-1.5 text-xs" onClick={() => setPan({ x: 40, y: 20, k: 0.85 })}>
+        <button type="button" className="btn-secondary !px-3 !py-1.5 text-xs" onClick={() => setPan({ x: 80, y: 40, k: 1 })}>
           {lang === "bg" ? "Нулирай изгледа" : "Reset view"}
         </button>
         <div className="ml-auto flex items-center gap-1">
