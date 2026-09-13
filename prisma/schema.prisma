@@ -113,6 +113,9 @@ model Profile {
   faculty    Faculty? @relation(fields: [facultyId], references: [id])
   department String?  // department / program
   year       Int?     // for students
+  studentCycle String? // ba | ma | phd
+  formOfStudy  String? // full-time | part-time
+  lecturerKind String? // staff | honorary
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }

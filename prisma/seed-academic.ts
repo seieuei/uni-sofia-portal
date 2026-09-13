@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import type { PrismaClient } from "@prisma/client";
 import { academicPeriodOf, parseMinutes } from "../src/lib/academic";
+import africanPlan from "../src/content/curriculum/african-studies-ba.json";
 
 const PROGRAM_CODE = "KHA240423";
 const PROGRAM_SLUG = "african-studies-ba";
@@ -107,127 +108,21 @@ export async function seedAcademic(prisma: PrismaClient) {
     },
   });
 
-  const courseRows: {
-    code: string;
-    titleBg: string;
-    titleEn: string;
-    type: "C" | "E" | "O";
-    semester: number;
-    ects: number;
-    hoursLectures: number;
-    hoursSeminars: number;
-    hoursPractice: number;
-    weeklyLoad: string;
-    grading: string;
-    language: string;
-    sortOrder: number;
-  }[] = [
-    {
-      code: "Z010",
-      titleBg: "Увод в социологията",
-      titleEn: "Introduction to Sociology",
-      type: "C",
-      semester: 1,
-      ects: 3,
-      hoursLectures: 30,
-      hoursSeminars: 0,
-      hoursPractice: 0,
-      weeklyLoad: "2+0",
-      grading: "e",
-      language: "bg",
-      sortOrder: 10,
-    },
-    {
-      code: "Z030",
-      titleBg: "Социолингвистика",
-      titleEn: "Sociolinguistics",
-      type: "C",
-      semester: 1,
-      ects: 4,
-      hoursLectures: 45,
-      hoursSeminars: 15,
-      hoursPractice: 0,
-      weeklyLoad: "3+1",
-      grading: "mixed",
-      language: "bg",
-      sortOrder: 20,
-    },
-    {
-      code: "Z040",
-      titleBg: "Чужд език (суахили)",
-      titleEn: "Foreign language (Swahili)",
-      type: "C",
-      semester: 1,
-      ects: 4,
-      hoursLectures: 0,
-      hoursSeminars: 60,
-      hoursPractice: 0,
-      weeklyLoad: "0+4",
-      grading: "ca",
-      language: "sw",
-      sortOrder: 30,
-    },
-    {
-      code: "E110",
-      titleBg: "Африкански литератури",
-      titleEn: "African Literatures",
-      type: "E",
-      semester: 1,
-      ects: 3,
-      hoursLectures: 30,
-      hoursSeminars: 0,
-      hoursPractice: 0,
-      weeklyLoad: "2+0",
-      grading: "ca",
-      language: "bg",
-      sortOrder: 40,
-    },
-    {
-      code: "E120",
-      titleBg: "Увод в суахили",
-      titleEn: "Introduction to Swahili",
-      type: "E",
-      semester: 1,
-      ects: 3,
-      hoursLectures: 0,
-      hoursSeminars: 30,
-      hoursPractice: 0,
-      weeklyLoad: "0+2",
-      grading: "ca",
-      language: "sw",
-      sortOrder: 50,
-    },
-    {
-      code: "E130",
-      titleBg: "Колониална история на Африка",
-      titleEn: "Colonial History of Africa",
-      type: "E",
-      semester: 1,
-      ects: 4,
-      hoursLectures: 30,
-      hoursSeminars: 15,
-      hoursPractice: 0,
-      weeklyLoad: "2+1",
-      grading: "e",
-      language: "bg",
-      sortOrder: 60,
-    },
-    {
-      code: "O210",
-      titleBg: "Академично писане",
-      titleEn: "Academic Writing",
-      type: "O",
-      semester: 1,
-      ects: 2,
-      hoursLectures: 0,
-      hoursSeminars: 30,
-      hoursPractice: 0,
-      weeklyLoad: "0+2",
-      grading: "ca",
-      language: "bg",
-      sortOrder: 70,
-    },
-  ];
+  const courseRows = africanPlan.courses.map((row) => ({
+    code: row.code,
+    titleBg: row.titleBg,
+    titleEn: row.titleEn,
+    type: row.type as "C" | "E" | "O",
+    semester: row.semester,
+    ects: row.ects,
+    hoursLectures: row.hoursLectures,
+    hoursSeminars: row.hoursSeminars,
+    hoursPractice: row.hoursPractice,
+    weeklyLoad: row.weeklyLoad,
+    grading: row.grading,
+    language: row.language,
+    sortOrder: row.sortOrder,
+  }));
 
   const courses: Record<string, { id: string; type: string; ects: number; semester: number }> = {};
   for (const row of courseRows) {

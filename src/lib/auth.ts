@@ -77,6 +77,9 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
     facultyId: user.profile.facultyId,
     department: user.profile.department,
     year: user.profile.year,
+    studentCycle: user.profile.studentCycle,
+    formOfStudy: user.profile.formOfStudy,
+    lecturerKind: user.profile.lecturerKind,
   };
 }
 

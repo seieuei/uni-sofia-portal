@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useApp } from "@/components/Providers";
 import { t } from "@/lib/i18n";
 import { ROLES } from "@/lib/types";
+import { LECTURER_KINDS, STUDENT_CYCLES, STUDY_FORMS } from "@/lib/personTypes";
 
 type Faculty = { code: string; nameBg: string; nameEn: string };
 
@@ -21,6 +22,9 @@ export default function RegisterPage() {
     facultyCode: "FCML",
     department: "Африканистика",
     year: "1",
+    studentCycle: "ba",
+    formOfStudy: "full-time",
+    lecturerKind: "staff",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -135,16 +139,64 @@ export default function RegisterPage() {
           />
         </div>
         {form.role === "student" && (
+          <>
+            <div>
+              <label className="label">{t("studentCycleLabel", lang)}</label>
+              <select
+                className="field"
+                value={form.studentCycle}
+                onChange={(e) => setForm({ ...form, studentCycle: e.target.value })}
+              >
+                {STUDENT_CYCLES.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {lang === "bg" ? c.labelBg : c.labelEn}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {form.studentCycle === "ba" && (
+              <div>
+                <label className="label">{t("studyFormLabel", lang)}</label>
+                <select
+                  className="field"
+                  value={form.formOfStudy}
+                  onChange={(e) => setForm({ ...form, formOfStudy: e.target.value })}
+                >
+                  {STUDY_FORMS.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {lang === "bg" ? c.labelBg : c.labelEn}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            <div>
+              <label className="label">{t("yearLabel", lang)}</label>
+              <input
+                className="field"
+                type="number"
+                min={1}
+                max={6}
+                value={form.year}
+                onChange={(e) => setForm({ ...form, year: e.target.value })}
+              />
+            </div>
+          </>
+        )}
+        {form.role === "lecturer" && (
           <div>
-            <label className="label">{t("yearLabel", lang)}</label>
-            <input
+            <label className="label">{t("lecturerKindLabel", lang)}</label>
+            <select
               className="field"
-              type="number"
-              min={1}
-              max={6}
-              value={form.year}
-              onChange={(e) => setForm({ ...form, year: e.target.value })}
-            />
+              value={form.lecturerKind}
+              onChange={(e) => setForm({ ...form, lecturerKind: e.target.value })}
+            >
+              {LECTURER_KINDS.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {lang === "bg" ? c.labelBg : c.labelEn}
+                </option>
+              ))}
+            </select>
           </div>
         )}
         {error && <p className="text-sm text-burgundy">{error}</p>}

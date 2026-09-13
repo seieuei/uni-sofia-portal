@@ -120,15 +120,17 @@ export function academicNav(role: Role, labels: Record<string, string>) {
   const handbook = { href: "/handbook", label: labels.handbook };
   const journey = { href: "/journey", label: labels.journey };
   const structure = { href: "/structure", label: labels.structure };
+  const admissions = { href: "/admissions", label: labels.admissions };
+  const faculties = { href: "/faculties", label: labels.faculties };
 
   if (role === "student") {
-    return [week, inbox, courses, electives, curriculum, cases, journey, structure];
+    return [week, inbox, courses, electives, curriculum, cases, journey, admissions, structure];
   }
   if (role === "lecturer") {
     return [week, inbox, courses, curriculum, report, cases, structure];
   }
   if (role === "applicant") {
-    return [week, inbox, newCase, cases, journey, structure];
+    return [week, inbox, newCase, cases, journey, admissions, faculties, structure];
   }
   return [week, inbox, newCase, cases, curriculum, reports, handbook, structure];
 }

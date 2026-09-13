@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useApp } from "@/components/Providers";
 import { t } from "@/lib/i18n";
 import { formOfStudyLabel, gradingLabel, typeLabel } from "@/lib/academicUi";
+import { PersonTypeBadge } from "@/components/PersonTypeBadge";
+import Link from "next/link";
 
 type CourseRow = {
   id: string;
@@ -67,7 +69,19 @@ export default function CurriculumPage() {
         {lang === "bg" ? "Учебен план / COURSE CURRICULUM" : "COURSE CURRICULUM / Учебен план"}
       </p>
       <h1 className="mt-1 font-display text-3xl font-bold">{t("navCurriculum", lang)}</h1>
-      <p className="mt-2 text-ink/60">{lang === "bg" ? p.titleBg : p.titleEn}</p>
+      <p className="mt-2 flex flex-wrap items-center gap-2 text-ink/60">
+        <span>{lang === "bg" ? p.titleBg : p.titleEn}</span>
+        <PersonTypeBadge
+          role={user.role}
+          studentCycle={user.studentCycle}
+          formOfStudy={user.formOfStudy}
+          lecturerKind={user.lecturerKind}
+          lang={lang}
+        />
+      </p>
+      <Link href="/programs/african-studies-ba" className="mt-3 inline-block text-sm text-burgundy hover:underline">
+        {lang === "bg" ? "Публичен УчПлан (всички семестри)" : "Public UchPlan (all semesters)"} →
+      </Link>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {[

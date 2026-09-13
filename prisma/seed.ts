@@ -5,6 +5,7 @@ import path from "path";
 import { spawnSync } from "child_process";
 import { seedProcesses } from "./seed-processes";
 import { seedAcademic } from "./seed-academic";
+import { seedPersonas } from "./seed-personas";
 import { generateCaseDocument, writeGenerated } from "../src/lib/portalDocx";
 import { catalogBySlug, fieldsFor, routeFor } from "../src/lib/catalog";
 import { routeStepPayload } from "../src/lib/processRoute";
@@ -73,6 +74,13 @@ async function main() {
         nameEn: "Faculty of Classical and Modern Philology",
         shortBg: "ФКНФ",
         shortEn: "FCML",
+      },
+      {
+        code: "FFIL",
+        nameBg: "Философски факултет",
+        nameEn: "Faculty of Philosophy",
+        shortBg: "ФФ",
+        shortEn: "PHLS",
       },
       {
         code: "FMI",
@@ -484,6 +492,9 @@ async function main() {
       role: "student",
       department: "Африканистика",
       year: 3,
+      studentCycle: "ba",
+      formOfStudy: "full-time",
+      lecturerKind: null as string | null,
     },
     {
       email: "lecturer@demo.uni-sofia.local",
@@ -491,6 +502,9 @@ async function main() {
       role: "lecturer",
       department: "Африканистика",
       year: null as number | null,
+      studentCycle: null,
+      formOfStudy: null,
+      lecturerKind: "honorary",
     },
     {
       email: "program.admin@demo.uni-sofia.local",
@@ -498,6 +512,9 @@ async function main() {
       role: "program_admin",
       department: "Африканистика",
       year: null,
+      studentCycle: null,
+      formOfStudy: null,
+      lecturerKind: null,
     },
     {
       email: "faculty.admin@demo.uni-sofia.local",
@@ -505,6 +522,9 @@ async function main() {
       role: "faculty_admin",
       department: "ФКНФ деканат",
       year: null,
+      studentCycle: null,
+      formOfStudy: null,
+      lecturerKind: null,
     },
   ];
 
@@ -521,6 +541,9 @@ async function main() {
             facultyId: fcml.id,
             department: u.department,
             year: u.year,
+            studentCycle: u.studentCycle,
+            formOfStudy: u.formOfStudy,
+            lecturerKind: u.lecturerKind,
           },
         },
       },
@@ -831,6 +854,7 @@ async function main() {
   }
 
   await seedAcademic(prisma);
+  await seedPersonas(prisma);
 
   const procCount = await prisma.processDefinition.count();
   console.log(

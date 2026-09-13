@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useApp } from "./Providers";
 import { t } from "@/lib/i18n";
 
@@ -9,14 +10,25 @@ export function Footer() {
     <footer className="mt-auto border-t border-ivory/10 bg-night text-ivory/80">
       <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-8 text-sm sm:flex-row sm:items-center sm:justify-between">
         <p>{t("footerNote", lang)}</p>
-        <a
-          href="https://www.uni-sofia.bg"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline decoration-ivory/30 underline-offset-4 hover:text-ivory"
-        >
-          {t("officialLink", lang)} ↗
-        </a>
+        <div className="flex flex-wrap gap-x-4 gap-y-1">
+          <Link href="/admissions" className="underline decoration-ivory/30 underline-offset-4 hover:text-ivory">
+            {t("navAdmissions", lang)}
+          </Link>
+          <Link href="/faculties" className="underline decoration-ivory/30 underline-offset-4 hover:text-ivory">
+            {t("navFaculties", lang)}
+          </Link>
+          <Link href="/structure" className="underline decoration-ivory/30 underline-offset-4 hover:text-ivory">
+            {t("navStructure", lang)}
+          </Link>
+          <a
+            href="https://www.uni-sofia.bg"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline decoration-ivory/30 underline-offset-4 hover:text-ivory"
+          >
+            {t("officialLink", lang)} ↗
+          </a>
+        </div>
       </div>
     </footer>
   );

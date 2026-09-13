@@ -13,14 +13,23 @@ const ROLE_EMAIL: Record<string, string> = {
   faculty_admin: "faculty.admin@demo.uni-sofia.local",
   admin_staff: "program.admin@demo.uni-sofia.local",
   assistant: "assistant@demo.uni-sofia.local",
+  student_part: "student.part@demo.uni-sofia.local",
+  student_ma: "student.ma@demo.uni-sofia.local",
+  student_phd: "student.phd@demo.uni-sofia.local",
+  lecturer_staff: "lecturer.staff@demo.uni-sofia.local",
 };
 
 const DEMOS = [
   "program.admin@demo.uni-sofia.local",
   "lecturer@demo.uni-sofia.local",
+  "lecturer.staff@demo.uni-sofia.local",
   "assistant@demo.uni-sofia.local",
   "faculty.admin@demo.uni-sofia.local",
   "student@demo.uni-sofia.local",
+  "student.part@demo.uni-sofia.local",
+  "student.ma@demo.uni-sofia.local",
+  "student.phd@demo.uni-sofia.local",
+  "student.phls@demo.uni-sofia.local",
 ];
 
 function LoginForm() {

@@ -199,8 +199,8 @@ const dict = {
   },
   structureTitle: { bg: "Университетска структура", en: "University structure" },
   structureLead: {
-    bg: "Интерактивна карта: органи, администрации, факултети. ФКНФ се разгъва и подчертава.",
-    en: "Interactive map: bodies, administrations, faculties. FCML expands and highlights.",
+    bg: "Радиална mind map: управление, администрации, факултети. Избери програма за учебен план (УчПлан).",
+    en: "Radial mind map: governance, administrations, faculties. Select a programme for its UchPlan.",
   },
   journeyTitle: { bg: "Как се става студент", en: "Becoming a student" },
   journeyLead: {
@@ -215,6 +215,19 @@ const dict = {
   yourFaculty: { bg: "Твоят факултет", en: "Your faculty" },
   demoHint: { bg: "Демо акаунт", en: "Demo account" },
   continueVisitor: { bg: "Продължи като посетител", en: "Continue as visitor" },
+  navAdmissions: { bg: "Кандидатстване", en: "Admissions" },
+  admissionsToc: { bg: "Съдържание", en: "Contents" },
+  admissionsSearch: { bg: "Търси специалност", en: "Search a programme" },
+  facultyChips: { bg: "Факултети", en: "Faculties" },
+  studentCycleLabel: { bg: "ОКС / степен", en: "Cycle / degree" },
+  studyFormLabel: { bg: "Форма на обучение", en: "Form of study" },
+  lecturerKindLabel: { bg: "Вид преподавател", en: "Lecturer type" },
+  subtypeBaFull: { bg: "Бакалавър · редовна", en: "Bachelor · full-time" },
+  subtypeBaPart: { bg: "Бакалавър · задочна", en: "Bachelor · part-time" },
+  subtypeMa: { bg: "Магистър", en: "Master" },
+  subtypePhd: { bg: "Докторант", en: "PhD" },
+  subtypeStaff: { bg: "Щатен преподавател", en: "Full-time lecturer" },
+  subtypeHonorary: { bg: "Хоноруван преподавател", en: "Honorary lecturer" },
 } as const;
 
 export type DictKey = keyof typeof dict;

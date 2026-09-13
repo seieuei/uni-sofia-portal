@@ -71,7 +71,12 @@ npm run db:seed
 | `program.admin@demo.uni-sofia.local` | program_admin | HR / натовареност / договори / писма |
 | `lecturer@demo.uni-sofia.local` | lecturer | отпуск + декларации на жури |
 | `faculty.admin@demo.uni-sofia.local` | faculty_admin | пълен админ пакет |
-| `student@demo.uni-sofia.local` | student | студентски заявления (3.x) |
+| `student@demo.uni-sofia.local` | student · BA редовна | студентски заявления (3.x) |
+| `student.part@demo.uni-sofia.local` | student · BA задочна | същото + задочен профил |
+| `student.ma@demo.uni-sofia.local` | student · магистър | магистърски акцент в таблото |
+| `student.phd@demo.uni-sofia.local` | student · докторант | докторантски процедури |
+| `lecturer.staff@demo.uni-sofia.local` | lecturer · щатен | курсове / отчет |
+| `student.phls@demo.uni-sofia.local` | student · ФФ | Философски факултет |
 
 Факултет: **FCML (ФКНФ)** · програма: **Африканистика**
 
@@ -140,6 +145,10 @@ Generated DOCX: `generated/` (ephemeral unless mounted).
 | `/cases` `/cases/[id]` | Дела + timeline + сваляне на DOCX |
 | `/reports` `/handbook` | Справки / справочник (не-форми) |
 | `/forms` | Наследени демо форми |
+| `/admissions` | Кандидатстване — правилник, бал, класиране, каталог специалности |
+| `/faculties/[slug]` | Факултетни хъбове (ФКНФ, ФФ/PHLS) |
+| `/programs/[slug]` | Учебен план (УчПлан) — Африканистика BA |
+| `/structure` | Радиална mind map + drill-down към УчПлан |
 
 ---
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { STUDENT_JOURNEY } from "@/lib/journey";
 import type { Lang } from "@/lib/types";
 
@@ -56,6 +57,16 @@ export function StudentJourney({ lang }: { lang: Lang }) {
                 <li key={d}>{d}</li>
               ))}
             </ul>
+            {step.id === "apply" && (
+              <Link href="/admissions" className="btn-primary mt-4 !px-3 !py-1.5 text-xs">
+                {lang === "bg" ? "Навигатор кандидатстване" : "Admissions navigator"} →
+              </Link>
+            )}
+            {step.id === "program" && (
+              <Link href="/admissions/faculties" className="btn-secondary mt-4 !px-3 !py-1.5 text-xs">
+                {lang === "bg" ? "Разгледай специалности" : "Browse programmes"} →
+              </Link>
+            )}
           </div>
         ) : null
       )}
